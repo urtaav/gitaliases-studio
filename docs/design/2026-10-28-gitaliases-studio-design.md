@@ -249,7 +249,7 @@ Windows / macOS / Linux.
    Tell the user where to save it (home folder) with per-OS paths.
 3. Remove the old alias section from the main config, if aliases were imported:
    `git config --global --remove-section alias`
-4. Connect the file: `git config --global include.path ~/.gitaliases`
+4. Connect the file: `git config --global --replace-all include.path ~/.gitaliases gitaliases`
 5. Test: `git <one of the aliases>`.
 
 Steps 3–4 contain no quotes, so they behave the same in every shell.
@@ -259,7 +259,7 @@ Restore = copy the backup back.
   doesn't know what it would delete). Without import, skip it and explain that
   aliases defined in the file win over same-named ones already in `~/.gitconfig`,
   because `git config --global include.path` appends the include at the end.
-- Re-applying is idempotent: `include.path` is set (replaced), not added twice.
+- Re-applying is idempotent and keeps other includes: `--replace-all` with the value pattern `gitaliases` only touches this entry.
 - git expands `~/` in `include.path` itself, so the same text works on Windows.
 
 **Method B — One by one.** Per pending change, a command for the selected shell:

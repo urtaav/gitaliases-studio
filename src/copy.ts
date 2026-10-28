@@ -31,7 +31,7 @@ export const copy = {
     emptyTitle: 'No aliases yet',
     emptyBody: 'Bring in the ones you already have, or pick some from the Catalog.',
     importPasteTitle: 'Paste from your terminal',
-    importPasteHelp: 'Run this command, then paste what it prints:',
+    importPasteHelp: 'Run this command outside any project folder, then paste what it prints:',
     importPasteCommand: 'git config --get-regexp alias',
     importPastePlaceholder: 'alias.st status\nalias.co checkout',
     importPasteButton: 'Import pasted aliases',

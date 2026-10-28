@@ -65,7 +65,12 @@ export function buildApplyAllSteps(
   if (opts.imported) {
     steps.push({ id: 'remove-section', command: 'git config --global --remove-section alias' });
   }
-  steps.push({ id: 'include', command: `git config --global include.path ~/${ALIAS_FILE_NAME}` });
+  // A plain set would overwrite an include.path the user already has; --replace-all with a
+  // value pattern only touches our own entry, so other includes survive and re-runs don't duplicate it.
+  steps.push({
+    id: 'include',
+    command: `git config --global --replace-all include.path ~/${ALIAS_FILE_NAME} gitaliases`,
+  });
   if (opts.testAlias) steps.push({ id: 'test', command: `git ${opts.testAlias}` });
   return steps;
 }

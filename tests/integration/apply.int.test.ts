@@ -3,7 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { serializeAliasFile } from '../../src/core/aliasFile';
-import { buildSetCommand } from '../../src/core/shell';
+import { buildApplyAllSteps, buildSetCommand } from '../../src/core/shell';
 import { TRICKY_VALUES } from '../fixtures/trickyValues';
 import { bashPath, gitGet, hasPwsh, isolatedEnv, runScript, tmp } from './helpers';
 
@@ -22,6 +22,21 @@ describe.each(shells)('one by one in $shell', ({ shell, available }) => {
     expect(gitGet(name, env)).toBe(value);
   }, 30_000);
 });
+
+test('all at once keeps include.path entries the user already had', () => {
+  const dir = tmp('keep');
+  const env = isolatedEnv(dir);
+  const git = (args: string[]) => spawnSync('git', args, { env, cwd: dir, encoding: 'utf8' });
+  git(['config', '--global', 'include.path', '~/work.gitconfig']);
+  const include = buildApplyAllSteps('bash', { imported: false }).find((s) => s.id === 'include')!.command!;
+  const args = include.split(' ').slice(1);
+  git(args);
+  git(args); // applying twice must not add a second entry
+  expect(git(['config', '--global', '--get-all', 'include.path']).stdout.trim().split('\n')).toEqual([
+    '~/work.gitconfig',
+    '~/.gitaliases',
+  ]);
+}, 30_000);
 
 test('all at once: the include file gives back every value', () => {
   const dir = tmp('file');

@@ -42,7 +42,8 @@ describe('buildApplyAllSteps', () => {
     expect(steps.map((s) => s.id)).toEqual(['backup', 'download', 'remove-section', 'include', 'test']);
     expect(steps[0]!.command).toBe('Copy-Item ~/.gitconfig ~/.gitconfig.bak');
     expect(steps[2]!.command).toBe('git config --global --remove-section alias');
-    expect(steps[3]!.command).toBe('git config --global include.path ~/.gitaliases');
+    // --replace-all with a value pattern keeps other include.path entries and never duplicates ours.
+    expect(steps[3]!.command).toBe('git config --global --replace-all include.path ~/.gitaliases gitaliases');
     expect(steps[4]!.command).toBe('git st');
   });
   test('backup command per shell', () => {

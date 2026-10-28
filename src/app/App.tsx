@@ -17,7 +17,7 @@ export function App() {
 
   useEffect(() => {
     document.title =
-      route.page === 'landing' ? copy.appName : `${copy.tabs[route.tab]} · ${copy.appName}`;
+      route.page === 'landing' ? copy.appName : `${copy.pageTitles[route.tab]} · ${copy.appName}`;
   }, [route]);
 
   return (

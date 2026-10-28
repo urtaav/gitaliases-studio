@@ -11,16 +11,84 @@ export const copy = {
   skipToContent: 'Skip to content',
 
   tabs: {
+    start: 'Start',
     aliases: 'My aliases',
     catalog: 'Catalog',
-    log: 'Log designer',
+    designers: 'Designers',
     apply: 'Apply',
   },
   tabHints: {
+    start: 'Pick what you want to do',
     aliases: 'See and edit the aliases you have',
     catalog: 'Add popular aliases with one click',
-    log: 'Design how your git history looks',
+    designers: 'Build aliases from options, no syntax needed',
     apply: 'Put your changes into git',
+  },
+  designers: {
+    log: 'History',
+    branches: 'Branches',
+    chart: 'Charts',
+    undo: 'Undo',
+  },
+  pageTitles: {
+    start: 'Start',
+    aliases: 'My aliases',
+    catalog: 'Catalog',
+    log: 'History designer',
+    branches: 'Branch designer',
+    chart: 'Chart designer',
+    undo: 'Undo assistant',
+    apply: 'Apply',
+  },
+
+  start: {
+    title: 'What do you want to do?',
+    intro: 'Pick one. You get a short command you can type every day, and you never have to write git syntax.',
+    choices: [
+      {
+        tab: 'branches',
+        title: 'See my recent branches',
+        example: 'Your branches, newest first, with the date of their last commit.',
+        sample: '2026-10-27 feature/search\n2026-10-26 main',
+      },
+      {
+        tab: 'chart',
+        title: 'See stats as a chart',
+        example: 'Commits per day, per author, or the files that change the most, as bars.',
+        sample: '2026-10-22   9 ▇▇▇▇▇▇▇▇▇\n2026-10-27   7 ▇▇▇▇▇▇▇',
+      },
+      {
+        tab: 'undo',
+        title: 'Undo something',
+        example: 'Tell us what happened and get the right command, with clear warnings.',
+        sample: 'git undo   → takes back your last commit\ngit unstage → un-adds a file',
+      },
+      {
+        tab: 'log',
+        title: 'Read my history better',
+        example: 'Choose what each line of git log shows, in your order and colors.',
+        sample: 'd3a3ac7 │ 2026-10-15 │ ▶ you │ fix: page size',
+      },
+    ],
+    orCatalog: 'Prefer ready-made aliases? Browse the Catalog.',
+    orMine: 'Already have aliases? Bring them into My aliases.',
+  },
+
+  loadExisting: {
+    branches: 'Load an existing branch list alias',
+    chart: 'Load an existing chart alias',
+  },
+
+  explain: {
+    title: 'How this command is built',
+    hint: 'Point at a part or an option to see which one makes it.',
+  },
+
+  risk: {
+    destructive: 'Can delete work',
+    careful: 'Careful',
+    ack: 'I understand this can delete work and I use it at my own risk.',
+    carefulNote: 'This rewrites history. Avoid it on commits you already pushed.',
   },
   themeLabel: 'Theme',
   shellLabel: 'Terminal',

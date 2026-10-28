@@ -102,7 +102,7 @@ export function Landing() {
             choose your terminal, and you get commands that work the first time.
           </p>
           <div className="btn-row">
-            <a className="btn btn-primary" href="#/studio/aliases">
+            <a className="btn btn-primary" href="#/studio/start">
               Open the studio
             </a>
             <a className="btn" href="#/studio/catalog">

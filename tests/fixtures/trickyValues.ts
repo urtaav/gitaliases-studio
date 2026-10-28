@@ -10,4 +10,7 @@ export const TRICKY_VALUES: { name: string; value: string }[] = [
   { name: 'semicolon', value: '!git fetch; git status' },
   { name: 'hash', value: '!echo #notacomment' },
   { name: 'func', value: '!f() { git checkout -b "$1" && git push -u origin "$1"; }; f' },
+  // Empty quotes and a non-ASCII bar: the case that broke in Windows PowerShell 5.1.
+  { name: 'activity', value: `!git log --format="%ad" | awk '{printf "%s ", $1; printf "▇"; print ""}'` },
+  { name: 'trailingbs', value: '!echo "C:\\temp\\"' },
 ];

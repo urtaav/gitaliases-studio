@@ -5,19 +5,21 @@ import { join } from 'node:path';
 import { serializeAliasFile } from '../../src/core/aliasFile';
 import { buildApplyAllSteps, buildSetCommand } from '../../src/core/shell';
 import { TRICKY_VALUES } from '../fixtures/trickyValues';
-import { bashPath, gitGet, hasPwsh, isolatedEnv, runScript, tmp } from './helpers';
+import { bashPath, gitGet, hasPwsh, hasWindowsPowerShell, isolatedEnv, runScript, tmp } from './helpers';
 
+// The PowerShell command must work in both pwsh 7 and Windows PowerShell 5.1.
 const shells = [
-  { shell: 'bash' as const, available: bashPath() !== null },
-  { shell: 'powershell' as const, available: hasPwsh() },
+  { runner: 'bash' as const, gen: 'bash' as const, available: bashPath() !== null },
+  { runner: 'powershell' as const, gen: 'powershell' as const, available: hasPwsh() },
+  { runner: 'powershell51' as const, gen: 'powershell' as const, available: hasWindowsPowerShell() },
 ];
 
-describe.each(shells)('one by one in $shell', ({ shell, available }) => {
+describe.each(shells)('one by one in $runner', ({ runner, gen, available }) => {
   test.skipIf(!available).each(TRICKY_VALUES)('$name survives exactly', ({ name, value }) => {
-    const dir = tmp(shell);
+    const dir = tmp(runner);
     const env = isolatedEnv(dir);
-    const cmd = buildSetCommand(shell, name, value);
-    const r = runScript(shell, cmd.text, env, dir);
+    const cmd = buildSetCommand(gen, name, value);
+    const r = runScript(runner, cmd.text, env, dir);
     expect(r.status, r.stderr).toBe(0);
     expect(gitGet(name, env)).toBe(value);
   }, 30_000);

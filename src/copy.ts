@@ -176,7 +176,6 @@ export const copy = {
     downloadButton: 'Download .gitaliases',
     restoreTitle: 'Want to undo?',
     restoreBody: 'Copy your backup back over ~/.gitconfig.',
-    pwshNotice: 'This value contains double quotes: it needs PowerShell 7.3 or newer. Windows PowerShell 5.1 drops them.',
     cmdNotice: 'Command Prompt cannot handle this value safely. Use All at once instead.',
     removeLabel: 'Remove',
     copyAll: 'Copy all commands',

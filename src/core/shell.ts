@@ -5,8 +5,12 @@ export const ALIAS_FILE_NAME = '.gitaliases';
 export interface CommandResult {
   text: string;
   supported: boolean;
-  notice?: 'needs-pwsh-7.3' | 'cmd-unsafe';
+  notice?: 'cmd-unsafe';
 }
+
+// Windows PowerShell 5.1 (and pwsh < 7.3) pass native arguments without escaping inner
+// double quotes, so git receives a cut value. This line escapes them only on those versions.
+const PS_LEGACY_QUOTES = String.raw`if ($PSVersionTable.PSVersion -lt [version]'7.3') { $value = $value -replace '(\\*)"', '$1$1\"' -replace '(\\+)$', '$1$1' }`;
 
 /** Characters cmd.exe interprets even inside double quotes, or that would end them. */
 export function isCmdSafe(value: string): boolean {
@@ -22,11 +26,11 @@ export function buildSetCommand(shell: Shell, name: string, value: string): Comm
       };
     case 'powershell': {
       // A single-quoted here-string is fully literal: no $, backtick or quote handling.
-      const text = `$value = @'\n${value}\n'@\ngit config --global alias.${name} $value`;
-      // Windows PowerShell 5.1 drops embedded double quotes when calling native programs.
-      return value.includes('"')
-        ? { text, supported: true, notice: 'needs-pwsh-7.3' }
-        : { text, supported: true };
+      const fix = value.includes('"') ? `${PS_LEGACY_QUOTES}\n` : '';
+      return {
+        text: `$value = @'\n${value}\n'@\n${fix}git config --global alias.${name} $value`,
+        supported: true,
+      };
     }
     case 'cmd':
       return isCmdSafe(value)

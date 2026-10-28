@@ -19,6 +19,10 @@ export function hasCommand(cmd: string, args: string[]): boolean {
 
 export const hasPwsh = (): boolean => hasCommand('pwsh', ['-NoProfile', '-Command', '$PSVersionTable.PSVersion.Major']);
 
+/** Windows PowerShell 5.1 ships with Windows and is what many people open by default. */
+export const hasWindowsPowerShell = (): boolean =>
+  process.platform === 'win32' && hasCommand('powershell.exe', ['-NoProfile', '-Command', '$PSVersionTable.PSVersion.Major']);
+
 /** Environment with an isolated global config, so tests never touch the real one. */
 export function isolatedEnv(dir: string): NodeJS.ProcessEnv {
   return {
@@ -30,7 +34,12 @@ export function isolatedEnv(dir: string): NodeJS.ProcessEnv {
 }
 
 /** Runs a script the same way a user pasting it would: as a file in that shell. */
-export function runScript(shell: 'bash' | 'powershell', script: string, env: NodeJS.ProcessEnv, dir: string): SpawnSyncReturns<string> {
+export function runScript(
+  shell: 'bash' | 'powershell' | 'powershell51',
+  script: string,
+  env: NodeJS.ProcessEnv,
+  dir: string,
+): SpawnSyncReturns<string> {
   if (shell === 'bash') {
     const file = join(dir, 'cmd.sh');
     writeFileSync(file, script + '\n');
@@ -39,7 +48,11 @@ export function runScript(shell: 'bash' | 'powershell', script: string, env: Nod
   const file = join(dir, 'cmd.ps1');
   // BOM so Windows PowerShell and pwsh read the file as UTF-8.
   writeFileSync(file, '\uFEFF' + script + '\n');
-  return spawnSync('pwsh', ['-NoProfile', '-NonInteractive', '-File', file], { env, encoding: 'utf8' });
+  const exe = shell === 'powershell51' ? 'powershell.exe' : 'pwsh';
+  return spawnSync(exe, ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', file], {
+    env,
+    encoding: 'utf8',
+  });
 }
 
 /**

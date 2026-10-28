@@ -15,8 +15,13 @@ describe('buildSetCommand', () => {
       supported: true,
     });
   });
-  test('powershell flags double quotes', () => {
-    expect(buildSetCommand('powershell', 'x', 'log --format="%h"').notice).toBe('needs-pwsh-7.3');
+  test('powershell escapes double quotes only on versions older than 7.3', () => {
+    const v = 'log --format="%h"';
+    const fix = String.raw`if ($PSVersionTable.PSVersion -lt [version]'7.3') { $value = $value -replace '(\\*)"', '$1$1\"' -replace '(\\+)$', '$1$1' }`;
+    expect(buildSetCommand('powershell', 'x', v)).toEqual({
+      text: `$value = @'\n${v}\n'@\n${fix}\ngit config --global alias.x $value`,
+      supported: true,
+    });
   });
   test('cmd only for safe values', () => {
     expect(buildSetCommand('cmd', 'x', 'checkout -b')).toEqual({

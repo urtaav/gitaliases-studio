@@ -144,9 +144,6 @@ export function ApplyTab() {
                 <b>git {change.name}</b>
               </div>
               {result.supported ? <CommandBlock text={result.text} /> : null}
-              {'notice' in result && result.notice === 'needs-pwsh-7.3' && (
-                <Notice tone="warn">{copy.apply.pwshNotice}</Notice>
-              )}
               {'notice' in result && result.notice === 'cmd-unsafe' && (
                 <Notice tone="warn">{copy.apply.cmdNotice}</Notice>
               )}

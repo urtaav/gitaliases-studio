@@ -267,7 +267,8 @@ Restore = copy the backup back.
 - add/edit: `git config --global alias.<name> <value>`, quoted correctly for
   the shell:
   - PowerShell: single-quoted here-string assigned to a variable, then passed.
-    Values containing `"` need PowerShell 7.3+; detect this and show a notice.
+    Values containing `"` get one extra line that escapes them on PowerShell older than 7.3
+    (Windows PowerShell 5.1 passes inner quotes to git unescaped); newer versions skip it.
   - Bash/zsh: single-quoted with `'\''` escaping.
   - Command Prompt: only when the value has no characters cmd can't handle
     safely; otherwise tell the user to use Method A.

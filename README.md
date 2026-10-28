@@ -15,7 +15,7 @@ Import, design and apply git aliases visually. Everything runs in your browser.
 - **git cheat**: the downloaded file keeps a description for each alias, and `git cheat` prints them in your terminal.
 - **English and Spanish**: the language follows your browser and can be switched at any time. Translations live in `src/i18n`.
 
-Live site: `https://OWNER.github.io/gitaliases-studio/`
+Live site: `https://urtaav.github.io/gitaliases-studio/`
 
 ## Development
 

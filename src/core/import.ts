@@ -1,3 +1,4 @@
+import { copy } from '../i18n';
 import { detectRisk } from './risk';
 import { inferType } from './validate';
 import type { Alias, ParsedAlias } from './types';
@@ -26,9 +27,9 @@ export function parseRegexpOutput(text: string): ImportResult {
       if (match) {
         aliases.push({ name: match[1]!, value: match[2]! });
       } else if (/^alias\.[^\s]+$/i.test(line)) {
-        skipped.push(`Line ${i + 1}: alias "${line.slice(6)}" has no value.`);
+        skipped.push(copy.core.importLines.noValue(i + 1, line.slice(6)));
       } else {
-        skipped.push(`Line ${i + 1}: not an alias line.`);
+        skipped.push(copy.core.importLines.notAlias(i + 1));
       }
     });
 
@@ -104,11 +105,11 @@ export function parseGitconfig(text: string): ImportResult {
 
     const entry = /^([A-Za-z][A-Za-z0-9-]*)\s*(=\s*(.*))?$/.exec(line);
     if (!entry) {
-      skipped.push(`Line ${i + 1}: could not read this alias line.`);
+      skipped.push(copy.core.importLines.unreadable(i + 1));
       continue;
     }
     if (entry[2] === undefined) {
-      skipped.push(`Line ${i + 1}: alias "${entry[1]}" has no value.`);
+      skipped.push(copy.core.importLines.noValue(i + 1, entry[1]!));
       continue;
     }
     const { value, used } = readValue(lines, i, entry[3] ?? '');

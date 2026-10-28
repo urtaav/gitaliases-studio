@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { copy, REPO_URL } from '../copy';
+import { LanguageSelect } from '../components/LanguageSelect';
 import { ThemeSelect } from '../studio/StudioLayout';
 
 const LONG = 'git log --oneline --graph --decorate --all';
@@ -30,10 +31,10 @@ function Demo() {
   }, [typed, still]);
 
   return (
-    <div className="demo" aria-label={`Instead of typing ${LONG}, type ${SHORT}.`} role="img">
+    <div className="demo" aria-label={copy.landing.demoLabel(LONG, SHORT)} role="img">
       <div className="term-bar">
-        <span>terminal</span>
-        <span>same result, fewer keys</span>
+        <span>{copy.landing.demoBar}</span>
+        <span>{copy.landing.demoNote}</span>
       </div>
       <div className="demo-body" aria-hidden="true">
         <div>
@@ -53,33 +54,8 @@ function Demo() {
   );
 }
 
-const PROBLEMS = [
-  {
-    title: 'Long commands',
-    body: 'git log --oneline --graph --decorate --all is a lot to type ten times a day.',
-  },
-  {
-    title: 'Hard to set up',
-    body: 'Creating an alias means remembering git config syntax and getting every quote right.',
-  },
-  {
-    title: 'Quotes break across terminals',
-    body: 'A command that works in Bash fails in PowerShell, and the error message rarely tells you why.',
-  },
-  {
-    title: 'Hard to share',
-    body: 'Your favorite aliases live inside one computer. Moving them to a new laptop or a teammate is a chore.',
-  },
-];
-
-const GLOSSARY = [
-  ['Alias', 'A short name you invent for a longer git command. You type git st and git runs git status.'],
-  ['Terminal', 'The window where you type commands: PowerShell or Command Prompt on Windows, Terminal on macOS and Linux.'],
-  ['.gitconfig', 'A text file in your home folder where git keeps your settings, including aliases.'],
-  ['Global config', 'Settings that apply to every repository on your computer, not just one project.'],
-];
-
 export function Landing() {
+  const t = copy.landing;
   return (
     <div className="landing">
       <nav className="landing-nav" aria-label="Main">
@@ -87,6 +63,7 @@ export function Landing() {
           {copy.appName}
         </a>
         <div className="btn-row">
+          <LanguageSelect id="landing-lang" />
           <ThemeSelect id="landing-theme" />
           <a className="btn" href={REPO_URL}>
             GitHub
@@ -96,26 +73,23 @@ export function Landing() {
 
       <main id="content">
         <section className="hero">
-          <h1>Git aliases without the syntax.</h1>
-          <p>
-            Pick, design and apply shortcuts for the git commands you use every day. You see what each one does, you
-            choose your terminal, and you get commands that work the first time.
-          </p>
+          <h1>{t.heroTitle}</h1>
+          <p>{t.heroBody}</p>
           <div className="btn-row">
             <a className="btn btn-primary" href="#/studio/start">
-              Open the studio
+              {t.open}
             </a>
             <a className="btn" href="#/studio/catalog">
-              Browse popular aliases
+              {t.browse}
             </a>
           </div>
           <Demo />
         </section>
 
         <section className="section" aria-labelledby="problem">
-          <h2 id="problem">Why it exists</h2>
+          <h2 id="problem">{t.whyTitle}</h2>
           <div className="problems">
-            {PROBLEMS.map((p) => (
+            {t.problems.map((p) => (
               <article key={p.title}>
                 <h3>{p.title}</h3>
                 <p>{p.body}</p>
@@ -125,27 +99,21 @@ export function Landing() {
         </section>
 
         <section className="section" aria-labelledby="how">
-          <h2 id="how">How it works</h2>
+          <h2 id="how">{t.howTitle}</h2>
           <ol className="how">
-            <li>
-              <b>1. Import</b>
-              Paste the aliases you already have, or start from zero. Only the alias section of your settings is read.
-            </li>
-            <li>
-              <b>2. Customize</b>
-              Add aliases from the catalog, write your own in two fields, or design how your git history looks.
-            </li>
-            <li>
-              <b>3. Apply</b>
-              Download one file and run one line, or copy a command per alias for your terminal.
-            </li>
+            {t.how.map((h) => (
+              <li key={h.title}>
+                <b>{h.title}</b>
+                {h.body}
+              </li>
+            ))}
           </ol>
         </section>
 
         <section className="section" aria-labelledby="glossary">
-          <h2 id="glossary">New to the terminal?</h2>
+          <h2 id="glossary">{t.glossaryTitle}</h2>
           <dl className="glossary">
-            {GLOSSARY.map(([term, def]) => (
+            {t.glossary.map(([term, def]) => (
               <div key={term} style={{ display: 'contents' }}>
                 <dt>{term}</dt>
                 <dd>{def}</dd>
@@ -155,18 +123,17 @@ export function Landing() {
         </section>
 
         <section className="section" aria-labelledby="privacy">
-          <h2 id="privacy">Your settings stay with you</h2>
+          <h2 id="privacy">{t.privacyTitle}</h2>
           <p className="muted" style={{ maxWidth: '64ch' }}>
-            Everything runs in your browser. Nothing you paste or import is uploaded, and the page makes no requests to
-            other sites. Your work is saved in this browser only, and you can clear it at any time.
+            {t.privacyBody}
           </p>
         </section>
       </main>
 
       <footer className="landing-footer">
-        <a href={REPO_URL}>Source on GitHub</a>
-        <span>MIT license</span>
-        <a href={`${REPO_URL}#contributing`}>Add a theme or an alias</a>
+        <a href={REPO_URL}>{t.source}</a>
+        <span>{t.license}</span>
+        <a href={`${REPO_URL}#contributing`}>{t.contribute}</a>
       </footer>
     </div>
   );

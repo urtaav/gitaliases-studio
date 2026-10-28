@@ -13,7 +13,7 @@ const WorkspaceCtx = createContext<WorkspaceValue | null>(null);
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, undefined, () =>
-    loadWorkspace(safeLocalStorage(), navigator.platform),
+    loadWorkspace(safeLocalStorage(), navigator.platform, navigator.language),
   );
 
   useEffect(() => {

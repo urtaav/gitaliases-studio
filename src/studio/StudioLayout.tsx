@@ -1,6 +1,7 @@
 import { copy } from '../copy';
 import { TerminalFrame } from '../app/TerminalFrame';
-import { FAMILY_LABELS, THEMES, type Theme } from '../data/themes';
+import { LanguageSelect } from '../components/LanguageSelect';
+import { familyLabel, THEME_FAMILIES, THEMES } from '../data/themes';
 import { useWorkspace } from '../state/WorkspaceContext';
 import { DESIGNER_TABS, type StudioTab } from '../app/router';
 import { AliasesTab } from './AliasesTab';
@@ -15,7 +16,6 @@ import { ApplyTab } from './ApplyTab';
 
 export function ThemeSelect({ id = 'theme-select' }: { id?: string }) {
   const { state, dispatch } = useWorkspace();
-  const families = Object.keys(FAMILY_LABELS) as Theme['family'][];
   return (
     <label className="inline-field" htmlFor={id}>
       <span>{copy.themeLabel}</span>
@@ -24,12 +24,12 @@ export function ThemeSelect({ id = 'theme-select' }: { id?: string }) {
         value={state.themeId}
         onChange={(e) => dispatch({ type: 'setTheme', themeId: e.target.value })}
       >
-        {families.map((fam) => (
-          <optgroup key={fam} label={FAMILY_LABELS[fam]}>
+        {THEME_FAMILIES.map((fam) => (
+          <optgroup key={fam} label={familyLabel(fam)}>
             {THEMES.filter((t) => t.family === fam).map((t) => (
               <option key={t.id} value={t.id}>
                 {t.name}
-                {t.mode === 'light' ? ' (light)' : ''}
+                {t.mode === 'light' ? ' ' + copy.light : ''}
               </option>
             ))}
           </optgroup>
@@ -43,7 +43,16 @@ export function StudioLayout({ tab }: { tab: StudioTab }) {
   const { changes, dispatch } = useWorkspace();
   return (
     <div className="studio">
-      <TerminalFrame active={tab} badges={{ apply: changes.length }} toolbar={<ThemeSelect />}>
+      <TerminalFrame
+        active={tab}
+        badges={{ apply: changes.length }}
+        toolbar={
+          <>
+            <LanguageSelect />
+            <ThemeSelect />
+          </>
+        }
+      >
         {DESIGNER_TABS.includes(tab) && <DesignerSwitch active={tab} />}
         {tab === 'start' && <StartTab />}
         {tab === 'aliases' && <AliasesTab />}

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { copy } from '../../copy';
 import { COLOR_ATTRS, cssColor, GIT_NAMED_COLORS, isHex, type ColorAttr } from '../../core/colors';
 import { makeField, type LogField, type LogRecipe } from '../../core/logFormat';
-import { fieldDef, FIELD_DEFS, type FieldGroup } from '../../data/fields';
+import { FIELD_DEFS, fieldLabel, type FieldGroup } from '../../data/fields';
 
 interface Props {
   recipe: LogRecipe;
@@ -30,7 +30,7 @@ function ColorPicker({ field, onChange }: { field: LogField; onChange(color: str
         >
           <option value="terminal">{copy.log.terminalColor}</option>
           {isRefs && <option value="auto">{copy.log.auto}</option>}
-          <option value="custom">Custom…</option>
+          <option value="custom">{copy.custom}</option>
           {GIT_NAMED_COLORS.filter((c) => c !== 'normal').map((c) => (
             <option key={c} value={c}>
               {c}
@@ -95,9 +95,9 @@ function FieldEditor({ field, onChange }: { field: LogField; onChange(f: LogFiel
               value={field.align}
               onChange={(e) => onChange({ ...field, align: e.target.value as LogField['align'] })}
             >
-              <option value="left">Left</option>
-              <option value="right">Right</option>
-              <option value="center">Center</option>
+              <option value="left">{copy.align.left}</option>
+              <option value="right">{copy.align.right}</option>
+              <option value="center">{copy.align.center}</option>
             </select>
           </div>
           <div className="field">
@@ -107,10 +107,10 @@ function FieldEditor({ field, onChange }: { field: LogField; onChange(f: LogFiel
               value={field.trunc}
               onChange={(e) => onChange({ ...field, trunc: e.target.value as LogField['trunc'] })}
             >
-              <option value="trunc">Cut the end..</option>
-              <option value="ltrunc">..Cut the start</option>
-              <option value="mtrunc">Cut the ..middle</option>
-              <option value="none">Don't cut</option>
+              <option value="trunc">{copy.log.truncs.trunc}</option>
+              <option value="ltrunc">{copy.log.truncs.ltrunc}</option>
+              <option value="mtrunc">{copy.log.truncs.mtrunc}</option>
+              <option value="none">{copy.log.truncs.none}</option>
             </select>
           </div>
         </>
@@ -140,7 +140,7 @@ export function FieldList({ recipe, onChange, onFocusField, warnings }: Props) {
       <h2 id="fields-title">{copy.log.fields}</h2>
       <ol className="field-list">
         {fields.map((f, i) => {
-          const def = fieldDef(f.placeholder);
+          const label = fieldLabel(f.placeholder);
           const swatch = f.color === 'auto' ? 'var(--refs)' : cssColor(f.color) ?? 'var(--fg)';
           return (
             <li
@@ -172,13 +172,13 @@ export function FieldList({ recipe, onChange, onFocusField, warnings }: Props) {
                   aria-expanded={open === f.uid}
                   onClick={() => setOpen(open === f.uid ? null : f.uid)}
                 >
-                  {def?.label ?? f.placeholder}
+                  {label}
                   <small>{f.placeholder}</small>
                 </button>
                 <button
                   type="button"
                   className="btn btn-small btn-icon"
-                  aria-label={`${copy.log.moveUp}: ${def?.label}`}
+                  aria-label={`${copy.log.moveUp}: ${label}`}
                   disabled={i === 0}
                   onClick={() => move(i, i - 1)}
                 >
@@ -187,7 +187,7 @@ export function FieldList({ recipe, onChange, onFocusField, warnings }: Props) {
                 <button
                   type="button"
                   className="btn btn-small btn-icon"
-                  aria-label={`${copy.log.moveDown}: ${def?.label}`}
+                  aria-label={`${copy.log.moveDown}: ${label}`}
                   disabled={i === fields.length - 1}
                   onClick={() => move(i, i + 1)}
                 >
@@ -196,7 +196,7 @@ export function FieldList({ recipe, onChange, onFocusField, warnings }: Props) {
                 <button
                   type="button"
                   className="btn btn-small btn-icon"
-                  aria-label={`${copy.log.removeField}: ${def?.label}`}
+                  aria-label={`${copy.log.removeField}: ${label}`}
                   onClick={() => setFields(fields.filter((x) => x.uid !== f.uid))}
                 >
                   ×
@@ -220,10 +220,10 @@ export function FieldList({ recipe, onChange, onFocusField, warnings }: Props) {
         </label>
         <select id="add-field" value={toAdd} onChange={(e) => setToAdd(e.target.value)}>
           {GROUPS.map((g) => (
-            <optgroup key={g} label={g}>
+            <optgroup key={g} label={copy.log.groups[g]}>
               {FIELD_DEFS.filter((d) => d.group === g).map((d) => (
                 <option key={d.placeholder} value={d.placeholder}>
-                  {d.label} ({d.placeholder})
+                  {fieldLabel(d.placeholder)} ({d.placeholder})
                 </option>
               ))}
             </optgroup>

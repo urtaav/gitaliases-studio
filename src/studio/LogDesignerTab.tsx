@@ -161,7 +161,7 @@ export function LogDesignerTab() {
 
           <div className="field">
             <ThemeSelect id="designer-theme" />
-            {isCustom && <span className="help">{copy.log.themeCustom}: your changes are kept until you pick a theme again.</span>}
+            {isCustom && <span className="help">{copy.log.themeCustom}</span>}
           </div>
 
           <div className="opt-grid">
@@ -174,10 +174,10 @@ export function LogDesignerTab() {
               >
                 {SEPARATORS.map((s) => (
                   <option key={s} value={s}>
-                    {s === '' ? 'Two spaces' : s}
+                    {s === '' ? copy.separators.two : s}
                   </option>
                 ))}
-                <option value="custom">Custom…</option>
+                <option value="custom">{copy.custom}</option>
               </select>
               {!sepIsPreset && (
                 <input
@@ -307,7 +307,7 @@ export function LogDesignerTab() {
                 />
               </div>
               {!r.fields.some((f) => fieldDef(f.placeholder)?.role === 'author') && (
-                <span className="help">The marker goes at the start of each line because there is no author field.</span>
+                <span className="help">{copy.log.markerAtStart}</span>
               )}
             </div>
           )}

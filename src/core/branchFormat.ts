@@ -1,6 +1,7 @@
 import { cssColor, type ColorAttr } from './colors';
 import { formatDate, fit, type Segment } from './preview';
 import { newUid } from './logFormat';
+import { copy } from '../i18n';
 import type { CommandPart } from './explain';
 import type { Issue } from './types';
 import type { SampleBranch } from '../data/sampleBranches';
@@ -8,16 +9,8 @@ import type { SampleBranch } from '../data/sampleBranches';
 export type BranchFieldKey = 'head' | 'name' | 'date' | 'author' | 'subject' | 'hash' | 'upstream' | 'track';
 export type BranchDateFormat = 'short' | 'relative' | 'iso';
 
-export const BRANCH_FIELDS: Record<BranchFieldKey, { label: string; explain: string }> = {
-  head: { label: 'Current branch marker', explain: 'A * next to the branch you are on' },
-  name: { label: 'Branch name', explain: 'The short branch name' },
-  date: { label: 'Last commit date', explain: 'When the last commit on the branch was made' },
-  author: { label: 'Last commit author', explain: 'Who made the last commit' },
-  subject: { label: 'Last commit message', explain: 'The first line of the last commit message' },
-  hash: { label: 'Last commit hash', explain: 'Short id of the last commit' },
-  upstream: { label: 'Remote branch', explain: 'The remote branch it tracks, if any' },
-  track: { label: 'Ahead / behind remote', explain: 'How many commits it is ahead of or behind its remote' },
-};
+export const BRANCH_FIELD_KEYS: readonly BranchFieldKey[] = ['head', 'name', 'date', 'author', 'subject', 'hash', 'upstream', 'track'];
+export const branchFieldText = (k: BranchFieldKey) => copy.core.branch.fields[k];
 
 export interface BranchField {
   uid: string;
@@ -32,6 +25,11 @@ export interface BranchField {
 export type BranchSort = '-committerdate' | 'committerdate' | 'refname' | '-authordate';
 export type BranchScope = 'local' | 'remote' | 'both';
 
+export const BRANCH_SORTS: readonly BranchSort[] = ['-committerdate', 'committerdate', 'refname', '-authordate'];
+export const BRANCH_SCOPES: readonly BranchScope[] = ['local', 'remote', 'both'];
+export const sortLabel = (s: BranchSort) => copy.core.branch.sorts[s];
+export const scopeLabel = (s: BranchScope) => copy.core.branch.scopes[s];
+
 export interface BranchRecipe {
   fields: BranchField[];
   /** ' ' means a single space with nothing around it. */
@@ -41,19 +39,6 @@ export interface BranchRecipe {
   scope: BranchScope;
   count: number;
 }
-
-export const SORT_LABELS: Record<BranchSort, string> = {
-  '-committerdate': 'Most recent commit first',
-  committerdate: 'Oldest commit first',
-  refname: 'Name, A to Z',
-  '-authordate': 'Most recently authored first',
-};
-
-export const SCOPE_LABELS: Record<BranchScope, string> = {
-  local: 'My local branches',
-  remote: 'Remote branches',
-  both: 'Local and remote',
-};
 
 const SCOPE_REFS: Record<BranchScope, string> = {
   local: 'refs/heads/',
@@ -79,9 +64,7 @@ export const DEFAULT_BRANCH_RECIPE: BranchRecipe = {
 };
 
 export function validateBranchSeparator(sep: string): Issue[] {
-  return sep.includes("'")
-    ? [{ code: 'invalid-separator', message: "The separator can't contain a single quote (')." }]
-    : [];
+  return sep.includes("'") ? [{ code: 'invalid-separator', message: copy.core.issues.separatorQuote }] : [];
 }
 
 function atom(f: BranchField): string {
@@ -132,25 +115,26 @@ export function buildBranchAliasValue(r: BranchRecipe): string {
 }
 
 export function explainBranch(r: BranchRecipe): CommandPart[] {
+  const t = copy.core.branch;
   const parts: CommandPart[] = [
-    { text: 'for-each-ref', explanation: 'List branches, one line each, in the format below', source: 'command' },
-    ...(usesColor(r) ? [{ text: '--color=auto', explanation: 'Use the colors below when printing to a terminal', source: 'command' }] : []),
-    { text: `--sort=${r.sort}`, explanation: `Order: ${SORT_LABELS[r.sort].toLowerCase()}`, source: 'sort' },
+    { text: 'for-each-ref', explanation: t.command, source: 'command' },
+    ...(usesColor(r) ? [{ text: '--color=auto', explanation: t.color, source: 'command' }] : []),
+    { text: `--sort=${r.sort}`, explanation: t.order(sortLabel(r.sort)), source: 'sort' },
   ];
-  if (r.count > 0) parts.push({ text: `--count=${r.count}`, explanation: `Show at most ${r.count} branches`, source: 'count' });
+  if (r.count > 0) parts.push({ text: `--count=${r.count}`, explanation: t.count(r.count), source: 'count' });
   for (const f of r.fields) {
     const extras = [
-      f.color && `in ${f.color}`,
+      f.color && copy.core.log.inColor(f.color),
       f.attrs.length > 0 && f.attrs.join(' '),
-      f.width > 0 && `${f.width} characters wide, aligned ${f.align}`,
+      f.width > 0 && t.alignedAs(f.width, f.align),
     ].filter(Boolean);
     parts.push({
       text: fieldFormat(f),
-      explanation: BRANCH_FIELDS[f.key].explain + (extras.length ? ` (${extras.join(', ')})` : ''),
+      explanation: t.fields[f.key].explain + (extras.length ? ` (${extras.join(', ')})` : ''),
       source: f.uid,
     });
   }
-  parts.push({ text: SCOPE_REFS[r.scope], explanation: `Which branches: ${SCOPE_LABELS[r.scope].toLowerCase()}`, source: 'scope' });
+  parts.push({ text: SCOPE_REFS[r.scope], explanation: t.which(scopeLabel(r.scope)), source: 'scope' });
   return parts;
 }
 
@@ -163,7 +147,7 @@ function fieldText(f: BranchField, b: SampleBranch): string {
   switch (f.key) {
     case 'head': return b.current ? '*' : ' ';
     case 'name': return b.name;
-    case 'date': return formatDate(b.date, f.dateFormat === 'iso' ? 'iso' : f.dateFormat);
+    case 'date': return formatDate(b.date, f.dateFormat);
     case 'author': return b.author;
     case 'subject': return b.subject;
     case 'hash': return b.hash;

@@ -1,5 +1,6 @@
 import { gitColorSpec, toSgr, type ColorAttr } from './colors';
-import { fieldDef } from '../data/fields';
+import { fieldDef, fieldLabel } from '../data/fields';
+import { copy } from '../i18n';
 import type { Issue } from './types';
 import type { CommandPart } from './explain';
 
@@ -74,15 +75,11 @@ export const DEFAULT_RECIPE: LogRecipe = {
 };
 
 export function validateSeparator(sep: string): Issue[] {
-  return sep.includes("'")
-    ? [{ code: 'invalid-separator', message: "The separator can't contain a single quote (')." }]
-    : [];
+  return sep.includes("'") ? [{ code: 'invalid-separator', message: copy.core.issues.separatorQuote }] : [];
 }
 
 export function validateDateFormat(fmt: string): Issue[] {
-  return fmt.includes("'")
-    ? [{ code: 'invalid-separator', message: "The date format can't contain a single quote (')." }]
-    : [];
+  return fmt.includes("'") ? [{ code: 'invalid-separator', message: copy.core.issues.dateQuote }] : [];
 }
 
 const ALIGN_PREFIX: Record<Align, string> = { left: '%<', right: '%>', center: '%><' };
@@ -141,49 +138,37 @@ export function logOptions(r: LogRecipe): string {
     .join(' ');
 }
 
-const DATE_WORDS: Record<string, string> = {
-  short: 'year-month-day',
-  relative: 'how long ago (e.g. "3 days ago")',
-  iso: 'date, time and zone',
-  rfc: 'email-style date',
-  default: "git's default date",
-};
-
 export function explainLog(r: LogRecipe): CommandPart[] {
-  const parts: CommandPart[] = [{ text: 'log', explanation: 'Show the commit history', source: 'command' }];
-  if (r.graph) parts.push({ text: '--graph', explanation: 'Draw the branch lines on the left', source: 'graph' });
-  if (r.all) parts.push({ text: '--all', explanation: 'Include every branch, not just the current one', source: 'all' });
-  if (r.maxCount > 0) parts.push({ text: `-n ${r.maxCount}`, explanation: `Show at most ${r.maxCount} commits`, source: 'maxCount' });
+  const t = copy.core.log;
+  const parts: CommandPart[] = [{ text: 'log', explanation: t.command, source: 'command' }];
+  if (r.graph) parts.push({ text: '--graph', explanation: t.graph, source: 'graph' });
+  if (r.all) parts.push({ text: '--all', explanation: t.all, source: 'all' });
+  if (r.maxCount > 0) parts.push({ text: `-n ${r.maxCount}`, explanation: t.max(r.maxCount), source: 'maxCount' });
   parts.push({
     text: dateOption(r.dateFormat),
     explanation: r.dateFormat.startsWith('format:')
-      ? `Dates written as ${r.dateFormat.slice(7)}`
-      : `Dates as ${DATE_WORDS[r.dateFormat] ?? r.dateFormat}`,
+      ? t.dateCustom(r.dateFormat.slice(7))
+      : t.dateAs(t.dateWords[r.dateFormat] ?? r.dateFormat),
     source: 'date',
   });
   const mark = r.highlight.enabled ? markerField(r) : undefined;
   for (const f of r.fields) {
-    const def = fieldDef(f.placeholder);
     const extras = [
-      f.color === 'auto' ? "git's own colors" : f.color && `in ${f.color}`,
+      f.color === 'auto' ? t.gitColors : f.color && t.inColor(f.color),
       f.attrs.length > 0 && f.attrs.join(' '),
-      f.width > 0 && `${f.width} characters wide${f.trunc === 'none' ? '' : ', cut if longer'}`,
-      f === mark && 'marked when the commit is yours',
+      f.width > 0 && t.wide(f.width, f.trunc !== 'none'),
+      f === mark && t.marked,
     ].filter(Boolean);
     parts.push({
       text: (f === mark ? '~~%ae~~' : gitColorSpec(f.color, f.attrs)) + widthSpec(f) + f.placeholder,
-      explanation: (def?.label ?? f.placeholder) + (extras.length ? ` (${extras.join(', ')})` : ''),
+      explanation: fieldLabel(f.placeholder) + (extras.length ? ` (${extras.join(', ')})` : ''),
       source: f.uid,
     });
   }
-  if (r.separator) parts.push({ text: r.separator, explanation: 'Separator between fields', source: 'sep' });
+  if (r.separator) parts.push({ text: r.separator, explanation: t.separator, source: 'sep' });
   if (r.highlight.enabled) {
-    parts.push({
-      text: 'sed …',
-      explanation: `Replaces the hidden marker: ${r.highlight.marker} and your color when the author email is yours`,
-      source: 'highlight',
-    });
-    if (r.highlight.pager) parts.push({ text: 'less -RFX', explanation: 'Scroll long output, keeping colors', source: 'highlight' });
+    parts.push({ text: 'sed …', explanation: t.sed(r.highlight.marker), source: 'highlight' });
+    if (r.highlight.pager) parts.push({ text: 'less -RFX', explanation: t.less, source: 'highlight' });
   }
   return parts;
 }

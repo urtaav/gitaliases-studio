@@ -15,10 +15,10 @@ function migrateAlias(a: Alias): Alias {
 }
 
 /** Returns a v2 state from stored data, or null when the data can't be used. */
-export function migrate(data: unknown, platform?: string): WorkspaceState | null {
+export function migrate(data: unknown, platform?: string, language?: string): WorkspaceState | null {
   const d = data as Stored | null;
   if (!d || typeof d !== 'object' || !Array.isArray(d.aliases) || !Array.isArray(d.baseline) || !d.draft) return null;
-  const fresh = initialState(platform);
+  const fresh = initialState(platform, language);
   if (d.version === 2) return { ...fresh, ...d } as WorkspaceState;
   if (d.version === 1) {
     return {
@@ -33,13 +33,17 @@ export function migrate(data: unknown, platform?: string): WorkspaceState | null
 }
 
 /** Never throws: missing, blocked, corrupt or unknown data all start a fresh workspace. */
-export function loadWorkspace(storage: Pick<Storage, 'getItem'> | null, platform?: string): WorkspaceState {
-  const fresh = initialState(platform);
+export function loadWorkspace(
+  storage: Pick<Storage, 'getItem'> | null,
+  platform?: string,
+  language?: string,
+): WorkspaceState {
+  const fresh = initialState(platform, language);
   if (!storage) return fresh;
   try {
     const raw = storage.getItem(STORAGE_KEY);
     if (!raw) return fresh;
-    return migrate(JSON.parse(raw), platform) ?? fresh;
+    return migrate(JSON.parse(raw), platform, language) ?? fresh;
   } catch {
     return fresh;
   }

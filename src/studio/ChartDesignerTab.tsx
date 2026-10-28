@@ -8,7 +8,8 @@ import {
   CHART_PRESETS,
   explainChart,
   isRanked,
-  METRIC_LABELS,
+  CHART_METRICS,
+  metricLabel,
   PERIODS,
   renderChartPreview,
   type BarChar,
@@ -23,8 +24,8 @@ import { SaveAlias } from './SaveAlias';
 import { recipeOf } from './openInDesigner';
 import { useTerminalColors } from './useTerminal';
 
-const PRESET_LABELS = { activity: 'Activity per day', authors: 'Top authors', churn: 'Most changed files' } as const;
-const periodLabel = (d: ChartPeriod) => (d === 0 ? 'All history' : d === 365 ? 'Last year' : `Last ${d} days`);
+const periodLabel = (d: ChartPeriod) =>
+  d === 0 ? copy.chartUi.allHistory : d === 365 ? copy.chartUi.lastYear : copy.chartUi.lastDays(d);
 
 export function ChartDesignerTab() {
   const { state, dispatch } = useWorkspace();
@@ -37,11 +38,11 @@ export function ChartDesignerTab() {
   return (
     <>
       <header className="page-head">
-        <h1>See stats as a chart</h1>
-        <p>Count commits by day, week or author, or find the files that change the most. Bars always fit your terminal.</p>
+        <h1>{copy.chartUi.title}</h1>
+        <p>{copy.chartUi.intro}</p>
       </header>
 
-      <div className="btn-row" style={{ marginBottom: 12 }} role="group" aria-label="Presets">
+      <div className="btn-row" style={{ marginBottom: 12 }} role="group" aria-label={copy.chartUi.presets}>
         {(Object.keys(CHART_PRESETS) as (keyof typeof CHART_PRESETS)[]).map((k) => (
           <button
             key={k}
@@ -49,7 +50,7 @@ export function ChartDesignerTab() {
             className="btn btn-small"
             onClick={() => set(applyThemeToChartRecipe(CHART_PRESETS[k], getTheme(state.themeId)), k)}
           >
-            {PRESET_LABELS[k]}
+            {copy.chartUi.presetLabels[k]}
           </button>
         ))}
       </div>
@@ -57,7 +58,7 @@ export function ChartDesignerTab() {
       <TermPreview
         lines={renderChartPreview(r, SAMPLE_CHART[r.metric])}
         title={`$ git ${state.chartDraftName || 'alias'}`}
-        note="Sample data"
+        note={copy.chartUi.sample}
         bg={term.bg}
         fg={term.fg}
         focus={focus}
@@ -68,13 +69,13 @@ export function ChartDesignerTab() {
         <section className="panel" aria-labelledby="copts">
           <h2 id="copts">{copy.log.options}</h2>
           <div className="field" {...hover('metric')}>
-            <label htmlFor="cmetric">What to count</label>
+            <label htmlFor="cmetric">{copy.chartUi.metric}</label>
             <select id="cmetric" value={r.metric} onChange={(e) => set({ ...r, metric: e.target.value as ChartMetric })}>
-              {(Object.keys(METRIC_LABELS) as ChartMetric[]).map((m) => <option key={m} value={m}>{METRIC_LABELS[m]}</option>)}
+              {CHART_METRICS.map((m) => <option key={m} value={m}>{metricLabel(m)}</option>)}
             </select>
           </div>
           <div className="field" {...hover('period')}>
-            <label htmlFor="cperiod">Period</label>
+            <label htmlFor="cperiod">{copy.chartUi.period}</label>
             <select id="cperiod" value={r.periodDays} onChange={(e) => set({ ...r, periodDays: Number(e.target.value) as ChartPeriod })}>
               {PERIODS.map((p) => <option key={p} value={p}>{periodLabel(p)}</option>)}
             </select>
@@ -82,7 +83,7 @@ export function ChartDesignerTab() {
           <div className="field">
             <label className="check" {...hover('merges')}>
               <input type="checkbox" checked={!r.merges} onChange={(e) => set({ ...r, merges: !e.target.checked })} />
-              Leave merge commits out
+              {copy.chartUi.noMerges}
             </label>
             <label className="check" {...hover('allBranches')}>
               <input type="checkbox" checked={r.allBranches} onChange={(e) => set({ ...r, allBranches: e.target.checked })} />
@@ -91,15 +92,15 @@ export function ChartDesignerTab() {
           </div>
           {isRanked(r.metric) && (
             <label className="inline-field field" htmlFor="ctop" {...hover('top')}>
-              Show the top (0 = all)
+              {copy.chartUi.top}
               <input id="ctop" type="number" min={0} max={200} value={r.top} onChange={(e) => set({ ...r, top: Math.max(0, Math.min(200, Number(e.target.value) || 0)) })} />
             </label>
           )}
           <div className="opt-grid" {...hover('bar')}>
             <div className="field">
-              <label htmlFor="cbar">Bar</label>
+              <label htmlFor="cbar">{copy.chartUi.bar}</label>
               <select id="cbar" value={r.bar} onChange={(e) => set({ ...r, bar: e.target.value as BarChar })}>
-                {BAR_CHARS.map((b) => <option key={b} value={b}>{b.repeat(4)}{b === '#' ? ' (works everywhere)' : ''}</option>)}
+                {BAR_CHARS.map((b) => <option key={b} value={b}>{b.repeat(4)}{b === '#' ? ' ' + copy.chartUi.worksEverywhere : ''}</option>)}
               </select>
             </div>
             <div className="field">
@@ -114,7 +115,7 @@ export function ChartDesignerTab() {
             </div>
           </div>
           <label className="inline-field field" htmlFor="cwidth" {...hover('bar')}>
-            Longest bar (characters)
+            {copy.chartUi.maxWidth}
             <input id="cwidth" type="number" min={10} max={80} value={r.maxWidth} onChange={(e) => set({ ...r, maxWidth: Math.max(10, Math.min(80, Number(e.target.value) || 40)) })} />
           </label>
           <div className="field">

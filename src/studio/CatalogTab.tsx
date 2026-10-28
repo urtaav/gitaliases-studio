@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { copy } from '../copy';
 import { AliasForm } from '../components/AliasForm';
-import { CATALOG, type CatalogEntry } from '../data/catalog';
+import { getCatalog, type CatalogEntry } from '../data/catalog';
 import { inferType } from '../core/validate';
 import { RiskAck } from '../components/RiskAck';
 import { RiskChip } from '../components/RiskChip';
@@ -28,7 +28,7 @@ export function CatalogTab() {
   const [ack, setAck] = useState(false);
 
   const q = query.trim().toLowerCase();
-  const groups = CATALOG.map((g) => ({
+  const groups = getCatalog().map((g) => ({
     ...g,
     entries: g.entries.filter(
       (e) => !q || e.name.includes(q) || e.description.toLowerCase().includes(q) || e.value.includes(q),
@@ -97,10 +97,10 @@ export function CatalogTab() {
                   <div className="alias-name">git {e.name}</div>
                   <p className="alias-desc">{e.description}</p>
                   <div className="alias-cmd">
-                    runs <code>git {e.value}</code>
+                    {copy.catalog.runs} <code>git {e.value}</code>
                   </div>
                   <div className="alias-cmd">
-                    example <code>{e.example}</code>
+                    {copy.catalog.example} <code>{e.example}</code>
                   </div>
                   <div className="alias-meta">
                     <RiskChip risk={e.risk} />

@@ -1,3 +1,4 @@
+import { copy } from '../i18n';
 import { GIT_BUILTINS } from './gitBuiltins';
 import type { Alias, AliasType, Issue } from './types';
 
@@ -9,29 +10,21 @@ export function validateName(name: string, existing: string[], originalName?: st
   const lower = name.toLowerCase();
 
   if (!NAME_RE.test(name)) {
-    issues.push({
-      code: 'invalid-name',
-      message: 'Use letters, numbers or dashes, starting with a letter.',
-    });
+    issues.push({ code: 'invalid-name', message: copy.core.issues.invalidName });
     return issues;
   }
   if (GIT_BUILTINS.has(lower)) {
-    issues.push({
-      code: 'builtin',
-      message: `git already has a command called "${lower}", so this alias would never run.`,
-    });
+    issues.push({ code: 'builtin', message: copy.core.issues.builtin(lower) });
   }
   const isSelf = originalName !== undefined && originalName.toLowerCase() === lower;
   if (!isSelf && existing.some((n) => n.toLowerCase() === lower)) {
-    issues.push({ code: 'duplicate', message: `You already have an alias called "${lower}".` });
+    issues.push({ code: 'duplicate', message: copy.core.issues.duplicate(lower) });
   }
   return issues;
 }
 
 export function validateValue(value: string): Issue[] {
-  return value.trim() === ''
-    ? [{ code: 'empty-value', message: 'Tell the alias what to run.' }]
-    : [];
+  return value.trim() === '' ? [{ code: 'empty-value', message: copy.core.issues.emptyValue }] : [];
 }
 
 export function inferType(value: string): AliasType {
@@ -47,12 +40,11 @@ export function inferType(value: string): AliasType {
 
 export function describeAlias(a: Alias): string {
   if (a.description) return a.description;
+  const d = copy.core.describe;
   switch (a.type) {
-    case 'shell':
-      return 'Runs a shell command';
-    case 'log':
-      return 'Custom log view';
+    case 'shortcut':
+      return d.runs(a.value.trim());
     default:
-      return `Runs git ${a.value.trim()}`;
+      return d[a.type];
   }
 }

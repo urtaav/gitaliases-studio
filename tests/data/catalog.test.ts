@@ -1,10 +1,10 @@
 import { expect, test } from 'vitest';
-import { CATALOG } from '../../src/data/catalog';
+import { getCatalog } from '../../src/data/catalog';
 import { validateName } from '../../src/core/validate';
 import { buildBranchAliasValue, DEFAULT_BRANCH_RECIPE } from '../../src/core/branchFormat';
 import { detectRisk } from '../../src/core/risk';
 
-const entries = CATALOG.flatMap((g) => g.entries);
+const entries = getCatalog().flatMap((g) => g.entries);
 
 test('size and required aliases', () => {
   expect(entries.length).toBeGreaterThanOrEqual(30);

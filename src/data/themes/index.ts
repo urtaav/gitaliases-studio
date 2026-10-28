@@ -1,4 +1,5 @@
 import { fieldDef } from '../fields';
+import { copy } from '../../i18n';
 import type { LogRecipe } from '../../core/logFormat';
 import type { BranchRecipe } from '../../core/branchFormat';
 import type { ChartRecipe } from '../../core/chartFormat';
@@ -34,12 +35,8 @@ export const THEMES: readonly Theme[] = Object.values(files).sort(
 
 export const DEFAULT_THEME_ID = 'nyx-veil';
 
-export const FAMILY_LABELS: Record<Theme['family'], string> = {
-  deity: 'Night deities',
-  creature: 'Creatures of the night',
-  royalty: 'Night royalty',
-  language: 'Language nods',
-};
+export const THEME_FAMILIES: readonly Theme['family'][] = ['deity', 'creature', 'royalty', 'language'];
+export const familyLabel = (f: Theme['family']) => copy.themeFamilies[f];
 
 export function getTheme(id: string): Theme {
   return THEMES.find((t) => t.id === id) ?? THEMES.find((t) => t.id === DEFAULT_THEME_ID)!;

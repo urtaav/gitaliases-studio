@@ -1,4 +1,5 @@
 import { cssColor, toSgr } from './colors';
+import { copy } from '../i18n';
 import type { CommandPart } from './explain';
 import type { Segment } from './preview';
 import type { ChartRow } from '../data/sampleChart';
@@ -24,12 +25,8 @@ export interface ChartRecipe {
   maxWidth: number;
 }
 
-export const METRIC_LABELS: Record<ChartMetric, string> = {
-  day: 'Commits per day',
-  week: 'Commits per week',
-  author: 'Commits per author',
-  file: 'Most changed files',
-};
+export const CHART_METRICS: readonly ChartMetric[] = ['day', 'week', 'author', 'file'];
+export const metricLabel = (m: ChartMetric) => copy.core.chart.metrics[m];
 
 const base: ChartRecipe = {
   metric: 'day',
@@ -79,7 +76,8 @@ function awkProgram(r: ChartRecipe): string {
   const bar = sgr ? String.raw`\033[${sgr}m%s\033[0m` : '%s';
   return (
     String.raw`{ c=$1; $1=""; sub(/^ +/, ""); n++; cnt[n]=c; lab[n]=$0; if (c>m) m=c; if (length($0)>w) w=length($0) } ` +
-    String.raw`END { if (n==0) { print "No commits in this period."; exit } ` +
+    // The empty-period message is written in the language active when the alias is built.
+    `END { if (n==0) { print "${copy.core.chart.noCommits.replace(/["\\']/g, '')}"; exit } ` +
     // One block per commit while it fits; only scale down when the biggest row is wider than maxWidth.
     `for (i=1; i<=n; i++) { b=(m>${r.maxWidth}) ? int(cnt[i]*${r.maxWidth}/m) : cnt[i]; if (b<1) b=1; s=""; for (j=0; j<b; j++) s=s "${r.bar}"; ` +
     String.raw`printf "%-" w "s %5d ${bar}\n", lab[i], cnt[i], s } }`
@@ -98,30 +96,21 @@ export function buildChartAliasValue(r: ChartRecipe): string {
 }
 
 export function explainChart(r: ChartRecipe): CommandPart[] {
-  const parts: CommandPart[] = [{ text: 'git log', explanation: 'Read the commit history', source: 'command' }];
-  if (r.allBranches) parts.push({ text: '--all', explanation: 'Count commits on every branch', source: 'allBranches' });
-  if (!r.merges) parts.push({ text: '--no-merges', explanation: 'Leave merge commits out', source: 'merges' });
+  const t = copy.core.chart;
+  const parts: CommandPart[] = [{ text: 'git log', explanation: t.command, source: 'command' }];
+  if (r.allBranches) parts.push({ text: '--all', explanation: t.all, source: 'allBranches' });
+  if (!r.merges) parts.push({ text: '--no-merges', explanation: t.noMerges, source: 'merges' });
   if (r.periodDays > 0) {
-    parts.push({ text: `--since=${r.periodDays}.days.ago`, explanation: `Only the last ${r.periodDays} days`, source: 'period' });
+    parts.push({ text: `--since=${r.periodDays}.days.ago`, explanation: t.since(r.periodDays), source: 'period' });
   }
-  const what: Record<ChartMetric, string> = {
-    day: 'Print the date of each commit',
-    week: 'Print the year and week number of each commit',
-    author: 'Print the author of each commit',
-    file: 'Print the files each commit changed',
-  };
-  parts.push({ text: SOURCE[r.metric], explanation: what[r.metric], source: 'metric' });
-  if (r.metric === 'file') parts.push({ text: "grep -v '^$'", explanation: 'Drop empty lines', source: 'metric' });
-  parts.push({ text: 'sort | uniq -c', explanation: 'Group equal lines and count them', source: 'metric' });
+  parts.push({ text: SOURCE[r.metric], explanation: t.what[r.metric], source: 'metric' });
+  if (r.metric === 'file') parts.push({ text: "grep -v '^$'", explanation: t.dropEmpty, source: 'metric' });
+  parts.push({ text: 'sort | uniq -c', explanation: t.group, source: 'metric' });
   if (isRanked(r.metric)) {
-    parts.push({ text: 'sort -rn', explanation: 'Biggest counts first', source: 'metric' });
-    if (r.top > 0) parts.push({ text: `head -n ${r.top}`, explanation: `Keep the top ${r.top}`, source: 'top' });
+    parts.push({ text: 'sort -rn', explanation: t.biggest, source: 'metric' });
+    if (r.top > 0) parts.push({ text: `head -n ${r.top}`, explanation: t.top(r.top), source: 'top' });
   }
-  parts.push({
-    text: 'awk …',
-    explanation: `Draw one bar per row with "${r.bar}", scaled to at most ${r.maxWidth} characters`,
-    source: 'bar',
-  });
+  parts.push({ text: 'awk …', explanation: t.bars(r.bar, r.maxWidth), source: 'bar' });
   return parts;
 }
 
@@ -132,7 +121,7 @@ export function renderChartPreview(r: ChartRecipe, rows: readonly ChartRow[]): S
     list.sort((a, b) => b.count - a.count);
     if (r.top > 0) list = list.slice(0, r.top);
   }
-  if (!list.length) return [[{ text: 'No commits in this period.', attrs: [] }]];
+  if (!list.length) return [[{ text: copy.core.chart.noCommits, attrs: [] }]];
   const max = Math.max(...list.map((x) => x.count));
   const width = Math.max(...list.map((x) => x.label.length));
   return list.map((row) => {

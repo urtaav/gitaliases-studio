@@ -126,7 +126,7 @@ export function AliasForm({ initial, existingNames, onSave, onCancel, onOpenInDe
         risk={risk}
         checked={acknowledged}
         onChange={setAcknowledged}
-        message="This command can delete changes that are not saved anywhere else."
+        message={copy.risk.formMessage}
       />
 
       {touched && issues.length > 0 && (

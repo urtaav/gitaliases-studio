@@ -4,13 +4,16 @@ import { CommandExplain } from '../components/CommandExplain';
 import { TermPreview } from '../components/TermPreview';
 import { COLOR_ATTRS, cssColor, GIT_NAMED_COLORS, isHex, type ColorAttr } from '../core/colors';
 import {
-  BRANCH_FIELDS,
+  BRANCH_FIELD_KEYS,
+  BRANCH_SCOPES,
+  BRANCH_SORTS,
+  branchFieldText,
   buildBranchAliasValue,
   explainBranch,
   makeBranchField,
   renderBranchPreview,
-  SCOPE_LABELS,
-  SORT_LABELS,
+  scopeLabel,
+  sortLabel,
   validateBranchSeparator,
   type BranchField,
   type BranchFieldKey,
@@ -41,7 +44,7 @@ function FieldEditor({ f, onChange }: { f: BranchField; onChange(f: BranchField)
             onChange={(e) => onChange({ ...f, color: e.target.value === 'terminal' ? '' : e.target.value === 'custom' ? '#E5C07B' : e.target.value })}
           >
             <option value="terminal">{copy.log.terminalColor}</option>
-            <option value="custom">Custom…</option>
+            <option value="custom">{copy.custom}</option>
             {GIT_NAMED_COLORS.filter((c) => c !== 'normal').map((c) => (
               <option key={c} value={c}>
                 {c}
@@ -72,9 +75,9 @@ function FieldEditor({ f, onChange }: { f: BranchField; onChange(f: BranchField)
         <div className="field">
           <label htmlFor={`ba-${f.uid}`}>{copy.log.align}</label>
           <select id={`ba-${f.uid}`} value={f.align} onChange={(e) => onChange({ ...f, align: e.target.value as BranchField['align'] })}>
-            <option value="left">Left</option>
-            <option value="right">Right</option>
-            <option value="middle">Center</option>
+            <option value="left">{copy.align.left}</option>
+            <option value="right">{copy.align.right}</option>
+            <option value="middle">{copy.align.center}</option>
           </select>
         </div>
       )}
@@ -116,14 +119,14 @@ export function BranchDesignerTab() {
   return (
     <>
       <header className="page-head">
-        <h1>See my recent branches</h1>
-        <p>Choose what each branch line shows and how they are ordered. The command is written for you.</p>
+        <h1>{copy.branchesUi.title}</h1>
+        <p>{copy.branchesUi.intro}</p>
       </header>
 
       <TermPreview
         lines={renderBranchPreview(r, SAMPLE_BRANCHES)}
         title={`$ git ${state.branchDraftName || 'alias'}`}
-        note="Sample branches"
+        note={copy.branchesUi.sample}
         bg={term.bg}
         fg={term.fg}
         focus={focus}
@@ -155,11 +158,11 @@ export function BranchDesignerTab() {
                     <span className="grip" aria-hidden="true">⋮⋮</span>
                     <span className="swatch" style={{ background: cssColor(f.color) ?? 'var(--fg)' }} aria-hidden="true" />
                     <button type="button" className="btn-link field-label" aria-expanded={open === f.uid} onClick={() => setOpen(open === f.uid ? null : f.uid)}>
-                      {BRANCH_FIELDS[f.key].label}
+                      {branchFieldText(f.key).label}
                     </button>
-                    <button type="button" className="btn btn-small btn-icon" aria-label={`${copy.log.moveUp}: ${BRANCH_FIELDS[f.key].label}`} disabled={i === 0} onClick={() => move(i, i - 1)}>↑</button>
-                    <button type="button" className="btn btn-small btn-icon" aria-label={`${copy.log.moveDown}: ${BRANCH_FIELDS[f.key].label}`} disabled={i === fields.length - 1} onClick={() => move(i, i + 1)}>↓</button>
-                    <button type="button" className="btn btn-small btn-icon" aria-label={`${copy.log.removeField}: ${BRANCH_FIELDS[f.key].label}`} onClick={() => setFields(fields.filter((x) => x.uid !== f.uid))}>×</button>
+                    <button type="button" className="btn btn-small btn-icon" aria-label={`${copy.log.moveUp}: ${branchFieldText(f.key).label}`} disabled={i === 0} onClick={() => move(i, i - 1)}>↑</button>
+                    <button type="button" className="btn btn-small btn-icon" aria-label={`${copy.log.moveDown}: ${branchFieldText(f.key).label}`} disabled={i === fields.length - 1} onClick={() => move(i, i + 1)}>↓</button>
+                    <button type="button" className="btn btn-small btn-icon" aria-label={`${copy.log.removeField}: ${branchFieldText(f.key).label}`} onClick={() => setFields(fields.filter((x) => x.uid !== f.uid))}>×</button>
                   </div>
                   {open === f.uid && <FieldEditor f={f} onChange={(nf) => setFields(fields.map((x) => (x.uid === f.uid ? nf : x)))} />}
                 </li>
@@ -168,8 +171,8 @@ export function BranchDesignerTab() {
             <div className="inline-field">
               <label htmlFor="badd" className="sr-only">{copy.log.addField}</label>
               <select id="badd" value={toAdd} onChange={(e) => setToAdd(e.target.value as BranchFieldKey)}>
-                {(Object.keys(BRANCH_FIELDS) as BranchFieldKey[]).map((k) => (
-                  <option key={k} value={k}>{BRANCH_FIELDS[k].label}</option>
+                {BRANCH_FIELD_KEYS.map((k) => (
+                  <option key={k} value={k}>{branchFieldText(k).label}</option>
                 ))}
               </select>
               <button type="button" className="btn" onClick={() => setFields([...fields, makeBranchField(toAdd)])}>{copy.log.addField}</button>
@@ -195,15 +198,15 @@ export function BranchDesignerTab() {
         <section className="panel" aria-labelledby="bopts">
           <h2 id="bopts">{copy.log.options}</h2>
           <div className="field" onMouseEnter={() => setFocus('sort')} onMouseLeave={() => setFocus(null)}>
-            <label htmlFor="bsort">Order</label>
+            <label htmlFor="bsort">{copy.branchesUi.order}</label>
             <select id="bsort" value={r.sort} onChange={(e) => set({ ...r, sort: e.target.value as BranchSort })}>
-              {(Object.keys(SORT_LABELS) as BranchSort[]).map((s) => <option key={s} value={s}>{SORT_LABELS[s]}</option>)}
+              {BRANCH_SORTS.map((s) => <option key={s} value={s}>{sortLabel(s)}</option>)}
             </select>
           </div>
           <div className="field" onMouseEnter={() => setFocus('scope')} onMouseLeave={() => setFocus(null)}>
-            <label htmlFor="bscope">Which branches</label>
+            <label htmlFor="bscope">{copy.branchesUi.which}</label>
             <select id="bscope" value={r.scope} onChange={(e) => set({ ...r, scope: e.target.value as BranchScope })}>
-              {(Object.keys(SCOPE_LABELS) as BranchScope[]).map((s) => <option key={s} value={s}>{SCOPE_LABELS[s]}</option>)}
+              {BRANCH_SCOPES.map((s) => <option key={s} value={s}>{scopeLabel(s)}</option>)}
             </select>
           </div>
           <label className="inline-field field" htmlFor="bcount" onMouseEnter={() => setFocus('count')} onMouseLeave={() => setFocus(null)}>
@@ -214,8 +217,8 @@ export function BranchDesignerTab() {
             <div className="field">
               <label htmlFor="bsep">{copy.log.separator}</label>
               <select id="bsep" value={sepIsPreset ? r.separator : 'custom'} onChange={(e) => set({ ...r, separator: e.target.value === 'custom' ? '·' : e.target.value })}>
-                {SEPARATORS.map((s) => <option key={s} value={s}>{s === ' ' ? 'Single space' : s === '' ? 'Two spaces' : s}</option>)}
-                <option value="custom">Custom…</option>
+                {SEPARATORS.map((s) => <option key={s} value={s}>{s === ' ' ? copy.separators.single : s === '' ? copy.separators.two : s}</option>)}
+                <option value="custom">{copy.custom}</option>
               </select>
               {!sepIsPreset && (
                 <input type="text" aria-label={`${copy.log.separator} (custom)`} value={r.separator} maxLength={6} onChange={(e) => set({ ...r, separator: e.target.value })} />

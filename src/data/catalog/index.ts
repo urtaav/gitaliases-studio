@@ -1,4 +1,5 @@
 import { buildRecipeValue } from '../../core/recipe';
+import { copy } from '../../i18n';
 import { DEFAULT_BRANCH_RECIPE } from '../../core/branchFormat';
 import { CHART_PRESETS } from '../../core/chartFormat';
 import { DEFAULT_RECIPE, type LogRecipe } from '../../core/logFormat';
@@ -64,16 +65,22 @@ export function presetRecipe(designer: DesignerKind, preset: string): Recipe | n
 type RawEntry = Omit<CatalogEntry, 'value' | 'recipe'> & { value?: string };
 type RawGroup = Omit<CatalogGroup, 'entries'> & { entries: RawEntry[] };
 
-/** Entries with a designer get their value from it, so the two never drift apart. */
+/**
+ * Entries with a designer get their value from it, so the two never drift apart.
+ * Texts come from the active language when it has a translation.
+ */
 function resolve(e: RawEntry): CatalogEntry {
-  if (!e.designer || !e.preset) return { ...e, value: e.value ?? '' };
+  const description = copy.catalogText[e.name] ?? e.description;
+  if (!e.designer || !e.preset) return { ...e, description, value: e.value ?? '' };
   const recipe = presetRecipe(e.designer, e.preset);
-  if (!recipe) return { ...e, value: e.value ?? '' };
-  return { ...e, value: buildRecipeValue(recipe), recipe };
+  if (!recipe) return { ...e, description, value: e.value ?? '' };
+  return { ...e, description, value: buildRecipeValue(recipe), recipe };
 }
 
 const files = import.meta.glob<RawGroup>('./*.json', { eager: true, import: 'default' });
+const RAW = Object.values(files).sort((a, b) => a.order - b.order);
 
-export const CATALOG: readonly CatalogGroup[] = Object.values(files)
-  .sort((a, b) => a.order - b.order)
-  .map((g) => ({ ...g, entries: g.entries.map(resolve) }));
+/** The catalog in the active language. Cheap enough to build on every render. */
+export function getCatalog(): CatalogGroup[] {
+  return RAW.map((g) => ({ ...g, title: copy.catalogGroups[g.id] ?? g.title, entries: g.entries.map(resolve) }));
+}

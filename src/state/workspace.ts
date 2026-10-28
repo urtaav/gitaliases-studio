@@ -2,6 +2,7 @@ import { DEFAULT_RECIPE, type LogRecipe } from '../core/logFormat';
 import { DEFAULT_BRANCH_RECIPE, type BranchRecipe } from '../core/branchFormat';
 import { CHART_PRESETS, type ChartRecipe } from '../core/chartFormat';
 import type { UndoRecipe } from '../core/undo';
+import { detectLocale, type Locale } from '../i18n';
 import {
   applyThemeToBranchRecipe,
   applyThemeToChartRecipe,
@@ -28,6 +29,7 @@ export interface WorkspaceState {
   chartDraftName: string;
   undoDraft: UndoDraft;
   meName: string;
+  locale: Locale;
 }
 
 export type UndoDraft = UndoRecipe & { name: string; acknowledged: boolean };
@@ -46,9 +48,10 @@ export type Action =
   | { type: 'setChartDraft'; draft: ChartRecipe; name?: string }
   | { type: 'setUndoDraft'; draft: Partial<UndoDraft> }
   | { type: 'setMeName'; name: string }
+  | { type: 'setLocale'; locale: Locale }
   | { type: 'reset' };
 
-export function initialState(platform: string = ''): WorkspaceState {
+export function initialState(platform: string = '', language: string = ''): WorkspaceState {
   const theme = getTheme(DEFAULT_THEME_ID);
   return {
     version: 2,
@@ -66,6 +69,7 @@ export function initialState(platform: string = ''): WorkspaceState {
     chartDraftName: 'activity',
     undoDraft: { situationId: 'undo', confirm: false, name: 'undo', acknowledged: false },
     meName: 'you',
+    locale: detectLocale(language),
   };
 }
 
@@ -117,8 +121,11 @@ export function reducer(s: WorkspaceState, a: Action): WorkspaceState {
       return { ...s, undoDraft: { ...s.undoDraft, ...a.draft } };
     case 'setMeName':
       return { ...s, meName: a.name };
+    case 'setLocale':
+      return { ...s, locale: a.locale };
     case 'reset':
-      return initialState(s.shell === 'powershell' ? 'Win' : '');
+      // Keep the language and terminal the person already chose.
+      return { ...initialState(s.shell === 'powershell' ? 'Win' : ''), locale: s.locale };
   }
 }
 

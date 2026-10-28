@@ -4,13 +4,20 @@ import { AliasForm } from '../components/AliasForm';
 import { CommandBlock } from '../components/CopyButton';
 import { Notice } from '../components/Notice';
 import { parseGitconfig, parseRegexpOutput, toAliases, type ImportResult } from '../core/import';
-import { parseLogAliasValue } from '../core/logParse';
 import { describeAlias } from '../core/validate';
+import { openInDesigner } from './openInDesigner';
 import { navigate } from '../app/router';
 import { useWorkspace } from '../state/WorkspaceContext';
 import type { Alias, ChangeKind } from '../core/types';
 
-const TYPE_LABEL: Record<Alias['type'], string> = { shortcut: 'shortcut', shell: 'shell', log: 'log view' };
+const TYPE_LABEL: Record<Alias['type'], string> = {
+  shortcut: 'shortcut',
+  shell: 'shell',
+  log: 'log view',
+  branches: 'branch list',
+  chart: 'chart',
+  undo: 'undo',
+};
 
 function ImportPanel({ onDone }: { onDone(): void }) {
   const { state, dispatch, changes } = useWorkspace();
@@ -131,11 +138,8 @@ export function AliasesTab() {
   const names = state.aliases.map((a) => a.name);
   const empty = rows.length === 0;
 
-  const openInDesigner = (a: Alias) => {
-    const recipe = a.recipe ?? parseLogAliasValue(a.value);
-    if (!recipe) return;
-    dispatch({ type: 'setDraft', draft: recipe, name: a.name });
-    navigate({ page: 'studio', tab: 'log' });
+  const openDesigner = (a: Alias) => {
+    openInDesigner(a, dispatch);
   };
 
   const save = (a: Alias, originalName?: string) => {
@@ -205,7 +209,7 @@ export function AliasesTab() {
                     existingNames={names}
                     onSave={save}
                     onCancel={() => setEditing(null)}
-                    onOpenInDesigner={openInDesigner}
+                    onOpenInDesigner={openDesigner}
                   />
                 </li>
               );

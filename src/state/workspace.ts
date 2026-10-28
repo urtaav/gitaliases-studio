@@ -1,20 +1,36 @@
 import { DEFAULT_RECIPE, type LogRecipe } from '../core/logFormat';
-import { applyThemeToRecipe, DEFAULT_THEME_ID, getTheme } from '../data/themes';
+import { DEFAULT_BRANCH_RECIPE, type BranchRecipe } from '../core/branchFormat';
+import { CHART_PRESETS, type ChartRecipe } from '../core/chartFormat';
+import type { UndoRecipe } from '../core/undo';
+import {
+  applyThemeToBranchRecipe,
+  applyThemeToChartRecipe,
+  applyThemeToRecipe,
+  DEFAULT_THEME_ID,
+  getTheme,
+} from '../data/themes';
 import type { Alias, Change, Shell } from '../core/types';
 
 export interface WorkspaceState {
-  version: 1;
+  version: 2;
   baseline: Alias[];
   aliases: Alias[];
   imported: boolean;
   themeId: string;
   shell: Shell;
   terminalBg: string;
+  /** Log designer draft and the alias name it saves to. */
   draft: LogRecipe;
-  /** Alias name the Log designer saves to. */
   draftName: string;
+  branchDraft: BranchRecipe;
+  branchDraftName: string;
+  chartDraft: ChartRecipe;
+  chartDraftName: string;
+  undoDraft: UndoDraft;
   meName: string;
 }
+
+export type UndoDraft = UndoRecipe & { name: string; acknowledged: boolean };
 
 export type Action =
   | { type: 'import'; aliases: Alias[] }
@@ -26,13 +42,16 @@ export type Action =
   | { type: 'setShell'; shell: Shell }
   | { type: 'setTerminalBg'; color: string }
   | { type: 'setDraft'; draft: LogRecipe; name?: string }
+  | { type: 'setBranchDraft'; draft: BranchRecipe; name?: string }
+  | { type: 'setChartDraft'; draft: ChartRecipe; name?: string }
+  | { type: 'setUndoDraft'; draft: Partial<UndoDraft> }
   | { type: 'setMeName'; name: string }
   | { type: 'reset' };
 
 export function initialState(platform: string = ''): WorkspaceState {
   const theme = getTheme(DEFAULT_THEME_ID);
   return {
-    version: 1,
+    version: 2,
     baseline: [],
     aliases: [],
     imported: false,
@@ -41,6 +60,11 @@ export function initialState(platform: string = ''): WorkspaceState {
     terminalBg: theme.colors.bg,
     draft: applyThemeToRecipe(DEFAULT_RECIPE, theme),
     draftName: 'ltable',
+    branchDraft: applyThemeToBranchRecipe(DEFAULT_BRANCH_RECIPE, theme),
+    branchDraftName: 'recent',
+    chartDraft: applyThemeToChartRecipe(CHART_PRESETS.activity, theme),
+    chartDraftName: 'activity',
+    undoDraft: { situationId: 'undo', confirm: false, name: 'undo', acknowledged: false },
     meName: 'you',
   };
 }
@@ -75,6 +99,8 @@ export function reducer(s: WorkspaceState, a: Action): WorkspaceState {
         themeId: theme.id,
         terminalBg: theme.colors.bg,
         draft: applyThemeToRecipe(s.draft, theme),
+        branchDraft: applyThemeToBranchRecipe(s.branchDraft, theme),
+        chartDraft: applyThemeToChartRecipe(s.chartDraft, theme),
       };
     }
     case 'setShell':
@@ -83,6 +109,12 @@ export function reducer(s: WorkspaceState, a: Action): WorkspaceState {
       return { ...s, terminalBg: a.color };
     case 'setDraft':
       return { ...s, draft: a.draft, draftName: a.name ?? s.draftName };
+    case 'setBranchDraft':
+      return { ...s, branchDraft: a.draft, branchDraftName: a.name ?? s.branchDraftName };
+    case 'setChartDraft':
+      return { ...s, chartDraft: a.draft, chartDraftName: a.name ?? s.chartDraftName };
+    case 'setUndoDraft':
+      return { ...s, undoDraft: { ...s.undoDraft, ...a.draft } };
     case 'setMeName':
       return { ...s, meName: a.name };
     case 'reset':

@@ -1,3 +1,4 @@
+import { detectRisk } from './risk';
 import { inferType } from './validate';
 import type { Alias, ParsedAlias } from './types';
 
@@ -123,7 +124,8 @@ export function toAliases(parsed: ParsedAlias[]): Alias[] {
   const byName = new Map<string, Alias>();
   for (const p of parsed) {
     const name = p.name.toLowerCase();
-    byName.set(name, { name, value: p.value, type: inferType(p.value) });
+    const risk = detectRisk(p.value);
+    byName.set(name, { name, value: p.value, type: inferType(p.value), ...(risk ? { risk } : {}) });
   }
   return [...byName.values()];
 }

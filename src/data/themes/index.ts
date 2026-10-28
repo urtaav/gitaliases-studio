@@ -1,5 +1,7 @@
 import { fieldDef } from '../fields';
 import type { LogRecipe } from '../../core/logFormat';
+import type { BranchRecipe } from '../../core/branchFormat';
+import type { ChartRecipe } from '../../core/chartFormat';
 
 export interface ThemeColors {
   bg: string;
@@ -41,6 +43,29 @@ export const FAMILY_LABELS: Record<Theme['family'], string> = {
 
 export function getTheme(id: string): Theme {
   return THEMES.find((t) => t.id === id) ?? THEMES.find((t) => t.id === DEFAULT_THEME_ID)!;
+}
+
+/** Branch lists: name like refs, dates and authors like the log, the rest muted. */
+export function applyThemeToBranchRecipe(r: BranchRecipe, t: Theme): BranchRecipe {
+  const byKey: Record<string, string> = {
+    name: t.colors.refs,
+    date: t.colors.date,
+    author: t.colors.author,
+    hash: t.colors.hash,
+    head: t.colors.me,
+    subject: '',
+    upstream: t.colors.muted,
+    track: t.colors.muted,
+  };
+  return {
+    ...r,
+    separatorColor: t.colors.separator,
+    fields: r.fields.map((f) => ({ ...f, color: byKey[f.key] ?? f.color })),
+  };
+}
+
+export function applyThemeToChartRecipe(r: ChartRecipe, t: Theme): ChartRecipe {
+  return { ...r, color: t.colors.me };
 }
 
 /** Paints a recipe with a theme by field role. The subject keeps the terminal color. */

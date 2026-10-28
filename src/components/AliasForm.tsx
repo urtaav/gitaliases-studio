@@ -1,7 +1,9 @@
 import { useId, useState } from 'react';
 import { copy } from '../copy';
-import { parseLogAliasValue } from '../core/logParse';
+import { detectRisk } from '../core/risk';
 import { inferType, validateName, validateValue } from '../core/validate';
+import { recipeOf } from '../studio/openInDesigner';
+import { RiskAck } from './RiskAck';
 import type { Alias } from '../core/types';
 
 interface Props {
@@ -20,26 +22,31 @@ export function AliasForm({ initial, existingNames, onSave, onCancel, onOpenInDe
   const [value, setValue] = useState(startsShell ? initial!.value.slice(1) : (initial?.value ?? ''));
   const [description, setDescription] = useState(initial?.description ?? '');
   const [touched, setTouched] = useState(false);
+  const [acknowledged, setAcknowledged] = useState(false);
 
   const finalValue = advanced ? `!${value.replace(/^!/, '')}` : value.trim();
+  const risk = detectRisk(finalValue);
+  const needsAck = risk === 'destructive' && !acknowledged;
   const issues = [
     ...validateName(name.trim(), existingNames, initial?.name),
     ...validateValue(advanced ? value : finalValue),
   ];
-  const isLog = initial?.type === 'log';
-  const designable = isLog && (initial?.recipe ?? parseLogAliasValue(initial.value));
+  const isDesigned = initial !== undefined && initial.type !== 'shortcut' && initial.type !== 'shell';
+  const designable = initial !== undefined && recipeOf(initial) !== null;
+  const unchanged = initial !== undefined && finalValue === initial.value;
 
   const save = () => {
     setTouched(true);
-    if (issues.length) return;
-    const unchanged = initial && finalValue === initial.value;
+    if (issues.length || needsAck) return;
     onSave(
       {
         name: name.trim().toLowerCase(),
+        // Keep the designer type and recipe only while the value is untouched.
         value: finalValue,
-        type: inferType(finalValue),
+        type: unchanged ? initial!.type : inferType(finalValue),
         ...(description.trim() ? { description: description.trim() } : {}),
         ...(unchanged && initial?.recipe ? { recipe: initial.recipe } : {}),
+        ...(risk ? { risk } : {}),
       },
       initial?.name,
     );
@@ -56,7 +63,7 @@ export function AliasForm({ initial, existingNames, onSave, onCancel, onOpenInDe
     >
       <h3 id={`${id}-title`}>{initial ? copy.form.titleEdit : copy.form.titleNew}</h3>
 
-      {isLog && (
+      {isDesigned && (
         <div className="btn-row" style={{ marginBottom: 12 }}>
           {designable && onOpenInDesigner ? (
             <button type="button" className="btn" onClick={() => onOpenInDesigner(initial!)}>
@@ -115,6 +122,13 @@ export function AliasForm({ initial, existingNames, onSave, onCancel, onOpenInDe
         <input id={`${id}-desc`} type="text" value={description} onChange={(e) => setDescription(e.target.value)} />
       </div>
 
+      <RiskAck
+        risk={risk}
+        checked={acknowledged}
+        onChange={setAcknowledged}
+        message="This command can delete changes that are not saved anywhere else."
+      />
+
       {touched && issues.length > 0 && (
         <ul className="issues" aria-live="polite">
           {issues.map((i) => (
@@ -124,7 +138,7 @@ export function AliasForm({ initial, existingNames, onSave, onCancel, onOpenInDe
       )}
 
       <div className="btn-row" style={{ marginTop: 12 }}>
-        <button type="submit" className="btn btn-primary" disabled={touched && issues.length > 0}>
+        <button type="submit" className="btn btn-primary" disabled={(touched && issues.length > 0) || needsAck}>
           {copy.form.save}
         </button>
         <button type="button" className="btn" onClick={onCancel}>

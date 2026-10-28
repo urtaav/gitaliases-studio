@@ -1,0 +1,20 @@
+{
+  "id": "dawn-oracle",
+  "name": "Dawn Oracle",
+  "family": "deity",
+  "mode": "light",
+  "description": "The hour the night ends: clear sky, crisp ink.",
+  "colors": {
+    "bg": "#F4F6FA",
+    "fg": "#1F2633",
+    "muted": "#586273",
+    "accent": "#3657C8",
+    "hash": "#8A5A00",
+    "date": "#556070",
+    "author": "#1F5FBF",
+    "me": "#1E7A3C",
+    "refs": "#A3337A",
+    "separator": "#B6BFCC",
+    "subject": "#1F2633"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "id": "morpheus-drift",
+  "name": "Morpheus Drift",
+  "family": "deity",
+  "mode": "dark",
+  "description": "Sea-green dreams with a golden edge.",
+  "colors": {
+    "bg": "#0F1A1A",
+    "fg": "#D3E6E2",
+    "muted": "#8BA6A0",
+    "accent": "#7EE0C3",
+    "hash": "#E6D27A",
+    "date": "#93ADA8",
+    "author": "#8AB4F8",
+    "me": "#B8E986",
+    "refs": "#F2A07B",
+    "separator": "#2F4442",
+    "subject": "#D3E6E2"
+  }
+}

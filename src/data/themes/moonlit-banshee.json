@@ -1,0 +1,20 @@
+{
+  "id": "moonlit-banshee",
+  "name": "Moonlit Banshee",
+  "family": "creature",
+  "mode": "dark",
+  "description": "A green glow drifting across the moors.",
+  "colors": {
+    "bg": "#0E1712",
+    "fg": "#D2E4D6",
+    "muted": "#8AA492",
+    "accent": "#9BE89B",
+    "hash": "#E8E48A",
+    "date": "#96B09D",
+    "author": "#7FD1C7",
+    "me": "#C3F08A",
+    "refs": "#F0A6CA",
+    "separator": "#2E4235",
+    "subject": "#D2E4D6"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "id": "frost-regent",
+  "name": "Frost Regent",
+  "family": "royalty",
+  "mode": "dark",
+  "description": "An ice crown under a winter sky.",
+  "colors": {
+    "bg": "#0F1820",
+    "fg": "#DDE9F5",
+    "muted": "#8FA3B8",
+    "accent": "#A8D8FF",
+    "hash": "#E6F3FF",
+    "date": "#9AB0C5",
+    "author": "#9FC2FF",
+    "me": "#A8F0D2",
+    "refs": "#F5B4D4",
+    "separator": "#33475A",
+    "subject": "#DDE9F5"
+  }
+}

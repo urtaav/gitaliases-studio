@@ -1,0 +1,20 @@
+{
+  "id": "porcelain-script",
+  "name": "Porcelain Script",
+  "family": "language",
+  "mode": "light",
+  "description": "A clean page for readable code.",
+  "colors": {
+    "bg": "#F2F5F8",
+    "fg": "#1E2A36",
+    "muted": "#566575",
+    "accent": "#2E6DB4",
+    "hash": "#7C5A00",
+    "date": "#536271",
+    "author": "#24639E",
+    "me": "#2D6A36",
+    "refs": "#9A3D6E",
+    "separator": "#B4C0CC",
+    "subject": "#1E2A36"
+  }
+}

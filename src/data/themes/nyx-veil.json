@@ -1,0 +1,20 @@
+{
+  "id": "nyx-veil",
+  "name": "Nyx Veil",
+  "family": "deity",
+  "mode": "dark",
+  "description": "The primordial night: violet dusk with warm starlight.",
+  "colors": {
+    "bg": "#15111F",
+    "fg": "#DCD5EE",
+    "muted": "#9A90B5",
+    "accent": "#B9A3FF",
+    "hash": "#FFCF70",
+    "date": "#A69CC2",
+    "author": "#92B8FF",
+    "me": "#8FE3B5",
+    "refs": "#FF9EBE",
+    "separator": "#3D3550",
+    "subject": "#DCD5EE"
+  }
+}

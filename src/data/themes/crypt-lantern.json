@@ -1,0 +1,20 @@
+{
+  "id": "crypt-lantern",
+  "name": "Crypt Lantern",
+  "family": "creature",
+  "mode": "dark",
+  "description": "Old stone, candle wax and brass.",
+  "colors": {
+    "bg": "#151515",
+    "fg": "#DDD6C8",
+    "muted": "#9C9488",
+    "accent": "#D9B26F",
+    "hash": "#E8C27A",
+    "date": "#A39B8E",
+    "author": "#A9C1D9",
+    "me": "#B5D88A",
+    "refs": "#E59A86",
+    "separator": "#3A3733",
+    "subject": "#DDD6C8"
+  }
+}

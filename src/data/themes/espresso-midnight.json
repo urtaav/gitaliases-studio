@@ -1,0 +1,20 @@
+{
+  "id": "espresso-midnight",
+  "name": "Espresso Midnight",
+  "family": "language",
+  "mode": "dark",
+  "description": "For late nights fueled by coffee and curly braces.",
+  "colors": {
+    "bg": "#1E1A17",
+    "fg": "#EADFD3",
+    "muted": "#A69684",
+    "accent": "#F89820",
+    "hash": "#F5C07A",
+    "date": "#ADA08F",
+    "author": "#8DBDE6",
+    "me": "#A8D98A",
+    "refs": "#F09A7A",
+    "separator": "#463D35",
+    "subject": "#EADFD3"
+  }
+}

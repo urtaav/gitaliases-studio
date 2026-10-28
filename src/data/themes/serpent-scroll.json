@@ -1,0 +1,20 @@
+{
+  "id": "serpent-scroll",
+  "name": "Serpent Scroll",
+  "family": "language",
+  "mode": "dark",
+  "description": "Blue and gold, indented with care.",
+  "colors": {
+    "bg": "#14202E",
+    "fg": "#DFE8F0",
+    "muted": "#93A6B9",
+    "accent": "#FFD43B",
+    "hash": "#FFD43B",
+    "date": "#9EB0C2",
+    "author": "#7FB8EB",
+    "me": "#A4E3A4",
+    "refs": "#F2A6C0",
+    "separator": "#34475C",
+    "subject": "#DFE8F0"
+  }
+}

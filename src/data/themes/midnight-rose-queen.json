@@ -1,0 +1,20 @@
+{
+  "id": "midnight-rose-queen",
+  "name": "Midnight Rose Queen",
+  "family": "royalty",
+  "mode": "dark",
+  "description": "Velvet petals in a candle-lit hall.",
+  "colors": {
+    "bg": "#1C1216",
+    "fg": "#F1E1E6",
+    "muted": "#AE939B",
+    "accent": "#FF8FA3",
+    "hash": "#FFC58A",
+    "date": "#B49CA3",
+    "author": "#D0A8FF",
+    "me": "#A9E5B4",
+    "refs": "#FF9FB0",
+    "separator": "#4A353D",
+    "subject": "#F1E1E6"
+  }
+}

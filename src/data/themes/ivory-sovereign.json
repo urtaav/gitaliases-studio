@@ -1,0 +1,20 @@
+{
+  "id": "ivory-sovereign",
+  "name": "Ivory Sovereign",
+  "family": "royalty",
+  "mode": "light",
+  "description": "Marble halls and dark ink seals.",
+  "colors": {
+    "bg": "#F7F5F2",
+    "fg": "#2B2622",
+    "muted": "#635B53",
+    "accent": "#9C3D54",
+    "hash": "#7A5200",
+    "date": "#5F5850",
+    "author": "#2D5DA8",
+    "me": "#2F6B2F",
+    "refs": "#A6385A",
+    "separator": "#C4BCB2",
+    "subject": "#2B2622"
+  }
+}

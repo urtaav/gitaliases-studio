@@ -1,0 +1,20 @@
+{
+  "id": "hecate-crossroads",
+  "name": "Hecate Crossroads",
+  "family": "deity",
+  "mode": "dark",
+  "description": "Torchlight and rose at the meeting of three roads.",
+  "colors": {
+    "bg": "#1A1015",
+    "fg": "#EBD9DF",
+    "muted": "#A88E97",
+    "accent": "#FF7A98",
+    "hash": "#FFB86B",
+    "date": "#B39AA3",
+    "author": "#C9A0F0",
+    "me": "#9EE6A8",
+    "refs": "#FF8FA6",
+    "separator": "#4A3540",
+    "subject": "#EBD9DF"
+  }
+}

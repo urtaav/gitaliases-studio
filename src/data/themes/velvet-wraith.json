@@ -1,0 +1,20 @@
+{
+  "id": "velvet-wraith",
+  "name": "Velvet Wraith",
+  "family": "creature",
+  "mode": "dark",
+  "description": "Soft purple shadows that never quite fade.",
+  "colors": {
+    "bg": "#18131D",
+    "fg": "#E4DCEB",
+    "muted": "#9C90A8",
+    "accent": "#D69CFF",
+    "hash": "#F0C674",
+    "date": "#A598B2",
+    "author": "#9FB7FF",
+    "me": "#A6E3A1",
+    "refs": "#F59BB5",
+    "separator": "#3E3448",
+    "subject": "#E4DCEB"
+  }
+}

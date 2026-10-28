@@ -1,0 +1,20 @@
+{
+  "id": "howling-ember",
+  "name": "Howling Ember",
+  "family": "creature",
+  "mode": "dark",
+  "description": "Fire in the eyes of the pack.",
+  "colors": {
+    "bg": "#1B1320",
+    "fg": "#E6D9EE",
+    "muted": "#A493AF",
+    "accent": "#FF9E64",
+    "hash": "#FFD27A",
+    "date": "#AD9CB8",
+    "author": "#B4A0FF",
+    "me": "#9DE0A0",
+    "refs": "#FF8F8F",
+    "separator": "#44364D",
+    "subject": "#E6D9EE"
+  }
+}

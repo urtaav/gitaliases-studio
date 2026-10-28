@@ -1,0 +1,20 @@
+{
+  "id": "starlit-princess",
+  "name": "Starlit Princess",
+  "family": "royalty",
+  "mode": "dark",
+  "description": "Pastel stars on a deep violet gown.",
+  "colors": {
+    "bg": "#17121F",
+    "fg": "#E9E0F5",
+    "muted": "#A196B5",
+    "accent": "#C3A6FF",
+    "hash": "#FFF3A0",
+    "date": "#A99FBC",
+    "author": "#9CE0FF",
+    "me": "#B6F0A0",
+    "refs": "#F7A8D8",
+    "separator": "#3E3550",
+    "subject": "#E9E0F5"
+  }
+}

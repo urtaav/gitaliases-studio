@@ -1,0 +1,20 @@
+{
+  "id": "rusted-crab",
+  "name": "Rusted Crab",
+  "family": "language",
+  "mode": "dark",
+  "description": "Warm oxide tones, safe by default.",
+  "colors": {
+    "bg": "#1D1517",
+    "fg": "#EEDCDC",
+    "muted": "#AA9090",
+    "accent": "#FF7A45",
+    "hash": "#FFB26B",
+    "date": "#B09A9A",
+    "author": "#9EC1F0",
+    "me": "#A9E2A0",
+    "refs": "#FF9A80",
+    "separator": "#4A3A3D",
+    "subject": "#EEDCDC"
+  }
+}

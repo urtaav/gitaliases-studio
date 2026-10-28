@@ -1,0 +1,20 @@
+{
+  "id": "lantern-of-selene",
+  "name": "Lantern of Selene",
+  "family": "deity",
+  "mode": "dark",
+  "description": "Cool moonlight over deep blue water.",
+  "colors": {
+    "bg": "#101722",
+    "fg": "#D8E1EC",
+    "muted": "#8C9AAD",
+    "accent": "#9CC4FF",
+    "hash": "#F2D58A",
+    "date": "#A3B1C4",
+    "author": "#8EC5FF",
+    "me": "#B5E8A1",
+    "refs": "#E6A6D8",
+    "separator": "#3A4658",
+    "subject": "#D8E1EC"
+  }
+}

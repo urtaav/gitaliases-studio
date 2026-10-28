@@ -1,0 +1,20 @@
+{
+  "id": "burrow-blue",
+  "name": "Burrow Blue",
+  "family": "language",
+  "mode": "dark",
+  "description": "A cheerful cyan tunnel, simple and fast.",
+  "colors": {
+    "bg": "#0F1F26",
+    "fg": "#D6EEF5",
+    "muted": "#8DAAB4",
+    "accent": "#00ADD8",
+    "hash": "#FDDD55",
+    "date": "#96B4BE",
+    "author": "#7FDBCA",
+    "me": "#B9EB8C",
+    "refs": "#F5A97F",
+    "separator": "#2C4550",
+    "subject": "#D6EEF5"
+  }
+}

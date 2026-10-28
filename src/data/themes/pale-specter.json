@@ -1,0 +1,20 @@
+{
+  "id": "pale-specter",
+  "name": "Pale Specter",
+  "family": "creature",
+  "mode": "light",
+  "description": "A ghost in daylight: lavender mist on paper.",
+  "colors": {
+    "bg": "#F3F1F6",
+    "fg": "#2A2433",
+    "muted": "#615A6E",
+    "accent": "#7A3FC2",
+    "hash": "#8C4A00",
+    "date": "#5E586A",
+    "author": "#3E4FB8",
+    "me": "#276E3A",
+    "refs": "#A12F5C",
+    "separator": "#BEB6CA",
+    "subject": "#2A2433"
+  }
+}

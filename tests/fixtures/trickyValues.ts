@@ -1,5 +1,14 @@
-/** Values that break naive quoting in one shell or another. */
+import { buildBranchAliasValue, DEFAULT_BRANCH_RECIPE } from '../../src/core/branchFormat';
+import { buildChartAliasValue, CHART_PRESETS } from '../../src/core/chartFormat';
+import { buildUndoAliasValue } from '../../src/core/undo';
+
+/** Values that break naive quoting in one shell or another, plus every builder's output. */
 export const TRICKY_VALUES: { name: string; value: string }[] = [
+  { name: 'recent', value: buildBranchAliasValue(DEFAULT_BRANCH_RECIPE) },
+  { name: 'chartday', value: buildChartAliasValue(CHART_PRESETS.activity) },
+  { name: 'chartfile', value: buildChartAliasValue(CHART_PRESETS.churn) },
+  { name: 'wipe', value: buildUndoAliasValue({ situationId: 'wipe', confirm: true }) },
+  { name: 'discard', value: buildUndoAliasValue({ situationId: 'discard', confirm: true }) },
   { name: 'plain', value: 'status -sb' },
   { name: 'single', value: "commit -m 'it''s fine'" },
   { name: 'double', value: 'log --pretty=format:"%h %s"' },

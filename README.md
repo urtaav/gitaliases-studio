@@ -64,7 +64,7 @@ Add an entry to the right file in `src/data/catalog/`:
 { "name": "undo", "value": "reset --soft HEAD~1", "description": "Undo your last commit but keep its changes staged.", "example": "git undo" }
 ```
 
-The name must not be a git command, and destructive commands need a `warning`.
+The name must not be a git command. Commands that can delete work need `"risk": "destructive"`; ones that rewrite history need `"risk": "careful"`.
 
 ## License
 

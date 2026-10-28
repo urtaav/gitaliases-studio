@@ -14,7 +14,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --exclude \"tests/integration/**\"",
-    "test:integration": "vitest run tests/integration",
+    "test:integration": "vitest run tests/integration --passWithNoTests",
     "screenshot": "node scripts/screenshot.mjs"
   },
   "dependencies": {

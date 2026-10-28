@@ -302,6 +302,9 @@ details.help-box ul { margin: 8px 0 0; padding-left: 18px; color: var(--muted); 
 .explain-list li.is-focus, .explain-list li:hover { background: var(--accent-soft); }
 .explain-list li.is-focus span { color: var(--fg); }
 @media (max-width: 640px) { .explain-list li { grid-template-columns: 1fr; gap: 2px; } }
+.explain-compact { margin-top: 6px; font-size: 12.5px; }
+.explain-compact summary { cursor: pointer; color: var(--accent); width: fit-content; }
+.explain-compact .explain-list { margin-top: 6px; }
 .chip-danger { border-color: #e5484d; color: #e5484d; }
 :root[data-mode='light'] .chip-danger { border-color: #b4232a; color: #b4232a; }
 .notice-danger { border-color: #e5484d; background: color-mix(in srgb, #e5484d 10%, var(--bg)); }

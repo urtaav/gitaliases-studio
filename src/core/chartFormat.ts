@@ -80,7 +80,8 @@ function awkProgram(r: ChartRecipe): string {
   return (
     String.raw`{ c=$1; $1=""; sub(/^ +/, ""); n++; cnt[n]=c; lab[n]=$0; if (c>m) m=c; if (length($0)>w) w=length($0) } ` +
     String.raw`END { if (n==0) { print "No commits in this period."; exit } ` +
-    `for (i=1; i<=n; i++) { b=int(cnt[i]*${r.maxWidth}/m); if (b<1) b=1; s=""; for (j=0; j<b; j++) s=s "${r.bar}"; ` +
+    // One block per commit while it fits; only scale down when the biggest row is wider than maxWidth.
+    `for (i=1; i<=n; i++) { b=(m>${r.maxWidth}) ? int(cnt[i]*${r.maxWidth}/m) : cnt[i]; if (b<1) b=1; s=""; for (j=0; j<b; j++) s=s "${r.bar}"; ` +
     String.raw`printf "%-" w "s %5d ${bar}\n", lab[i], cnt[i], s } }`
   );
 }
@@ -135,7 +136,7 @@ export function renderChartPreview(r: ChartRecipe, rows: readonly ChartRow[]): S
   const max = Math.max(...list.map((x) => x.count));
   const width = Math.max(...list.map((x) => x.label.length));
   return list.map((row) => {
-    const len = Math.max(1, Math.floor((row.count * r.maxWidth) / max));
+    const len = Math.max(1, max > r.maxWidth ? Math.floor((row.count * r.maxWidth) / max) : row.count);
     return [
       { text: row.label.padEnd(width) + ' ', attrs: [], uid: 'metric' },
       { text: String(row.count).padStart(5) + ' ', attrs: [], uid: 'metric' },

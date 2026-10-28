@@ -1,13 +1,15 @@
 // Takes headless-browser screenshots of the built app at desktop and phone width.
 // Usage: npm run build && npm run screenshot -- / /studio/aliases
+// (In Git Bash, prefix with MSYS_NO_PATHCONV=1 so "/" routes are not turned into paths.)
 import { spawn } from 'node:child_process';
-import { existsSync, mkdirSync } from 'node:fs';
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { createServer } from 'node:net';
 
 const routes = process.argv.slice(2).length ? process.argv.slice(2) : ['/'];
 const widths = [1280, 360];
 const outDir = resolve('screenshots');
+const framePath = resolve('dist/__frame.html');
 mkdirSync(outDir, { recursive: true });
 
 const candidates = [
@@ -46,12 +48,21 @@ const run = (args) =>
 for (const route of routes) {
   for (const width of widths) {
     const name = (route === '/' ? 'landing' : route.replace(/\W+/g, '-').replace(/^-|-$/g, '')) + `-${width}.png`;
-    const url = `http://localhost:${port}/gitaliases-studio/#${route}`;
+    const appUrl = `http://localhost:${port}/gitaliases-studio/#${route}`;
+    let url = appUrl;
+    // Headless Chrome won't shrink a window below ~500px, so narrow widths render inside an iframe.
+    if (width < 500) {
+      writeFileSync(
+        framePath,
+        `<!doctype html><body style="margin:0"><iframe src="${appUrl}" style="width:${width}px;height:2200px;border:0"></iframe>`,
+      );
+      url = `http://localhost:${port}/gitaliases-studio/__frame.html`;
+    }
     await run([
       '--headless=new',
       '--disable-gpu',
       '--hide-scrollbars',
-      `--window-size=${width},2200`,
+      `--window-size=${Math.max(width, 500)},2200`,
       '--virtual-time-budget=3000',
       `--screenshot=${resolve(outDir, name)}`,
       url,
@@ -60,5 +71,6 @@ for (const route of routes) {
   }
 }
 
+rmSync(framePath, { force: true });
 preview.kill();
 process.exit(0);

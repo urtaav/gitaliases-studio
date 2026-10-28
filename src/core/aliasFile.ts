@@ -10,8 +10,11 @@ export function quoteConfigValue(value: string): string {
   return `"${escaped}"`;
 }
 
+/** A description becomes a "#:" comment line, read back by git cheat; git ignores it. */
+const descriptionLine = (d: string) => `\t#: ${d.replace(/[\r\n]+/g, ' ').trim()}`;
+
 export function serializeAliasFile(
-  aliases: Pick<Alias, 'name' | 'value'>[],
+  aliases: (Pick<Alias, 'name' | 'value'> & { description?: string })[],
   generatedAt: Date = new Date(),
 ): string {
   const date = generatedAt.toISOString().slice(0, 10);
@@ -21,7 +24,10 @@ export function serializeAliasFile(
     '[alias]',
     ...[...aliases]
       .sort((a, b) => a.name.localeCompare(b.name))
-      .map((a) => `\t${a.name} = ${quoteConfigValue(a.value)}`),
+      .flatMap((a) => [
+        ...(a.description ? [descriptionLine(a.description)] : []),
+        `\t${a.name} = ${quoteConfigValue(a.value)}`,
+      ]),
   ];
   return lines.join('\n') + '\n';
 }

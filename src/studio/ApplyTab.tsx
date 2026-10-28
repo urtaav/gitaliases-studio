@@ -6,6 +6,8 @@ import { ShellPicker } from '../components/ShellPicker';
 import { serializeAliasFile } from '../core/aliasFile';
 import { ALIAS_FILE_NAME, buildApplyAllSteps, buildSetCommand, buildUnsetCommand } from '../core/shell';
 import { navigate } from '../app/router';
+import { detectRisk } from '../core/risk';
+import { RiskChip } from '../components/RiskChip';
 import { useWorkspace } from '../state/WorkspaceContext';
 import type { Change } from '../core/types';
 
@@ -27,6 +29,7 @@ function ChangeList({ changes }: { changes: Change[] }) {
         <li key={c.kind + c.name}>
           <span className={`chip chip-${c.kind}`}>{KIND_LABEL[c.kind]}</span>
           <b className="alias-name">git {c.name}</b>
+          {c.kind !== 'removed' && <RiskChip risk={c.after!.risk ?? detectRisk(c.after!.value)} />}
           {c.kind === 'edited' ? (
             <span className="alias-cmd">
               <s>{c.before!.value}</s> → {c.after!.value}

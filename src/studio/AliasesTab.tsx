@@ -5,6 +5,8 @@ import { CommandBlock } from '../components/CopyButton';
 import { Notice } from '../components/Notice';
 import { parseGitconfig, parseRegexpOutput, toAliases, type ImportResult } from '../core/import';
 import { describeAlias } from '../core/validate';
+import { detectRisk } from '../core/risk';
+import { RiskChip } from '../components/RiskChip';
 import { openInDesigner } from './openInDesigner';
 import { navigate } from '../app/router';
 import { useWorkspace } from '../state/WorkspaceContext';
@@ -225,6 +227,7 @@ export function AliasesTab() {
                   </div>
                   <div className="alias-meta">
                     <span className="chip">{TYPE_LABEL[a.type]}</span>
+                    <RiskChip risk={a.risk ?? detectRisk(a.value)} />
                     <ChangeChip kind={kind} />
                     {isRemoved && <span className="help">{copy.aliases.removedNote}</span>}
                   </div>

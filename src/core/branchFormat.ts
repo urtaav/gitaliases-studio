@@ -121,14 +121,20 @@ export function buildBranchFormat(r: BranchRecipe): string {
   return r.fields.map(fieldFormat).join(separatorFormat(r));
 }
 
+const usesColor = (r: BranchRecipe): boolean =>
+  r.fields.some((f) => f.color || f.attrs.length) || (r.separatorColor !== '' && !['', ' '].includes(r.separator));
+
 export function buildBranchAliasValue(r: BranchRecipe): string {
+  // for-each-ref drops %(color:…) unless asked, even with color.ui=always; auto keeps pipes plain.
+  const color = usesColor(r) ? ' --color=auto' : '';
   const count = r.count > 0 ? ` --count=${r.count}` : '';
-  return `for-each-ref --sort=${r.sort}${count} --format='${buildBranchFormat(r)}' ${SCOPE_REFS[r.scope]}`;
+  return `for-each-ref${color} --sort=${r.sort}${count} --format='${buildBranchFormat(r)}' ${SCOPE_REFS[r.scope]}`;
 }
 
 export function explainBranch(r: BranchRecipe): CommandPart[] {
   const parts: CommandPart[] = [
     { text: 'for-each-ref', explanation: 'List branches, one line each, in the format below', source: 'command' },
+    ...(usesColor(r) ? [{ text: '--color=auto', explanation: 'Use the colors below when printing to a terminal', source: 'command' }] : []),
     { text: `--sort=${r.sort}`, explanation: `Order: ${SORT_LABELS[r.sort].toLowerCase()}`, source: 'sort' },
   ];
   if (r.count > 0) parts.push({ text: `--count=${r.count}`, explanation: `Show at most ${r.count} branches`, source: 'count' });

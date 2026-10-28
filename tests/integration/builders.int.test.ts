@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { buildBranchAliasValue, DEFAULT_BRANCH_RECIPE } from '../../src/core/branchFormat';
 import { buildChartAliasValue, CHART_PRESETS } from '../../src/core/chartFormat';
 import { buildUndoAliasValue } from '../../src/core/undo';
+import { applyThemeToBranchRecipe, DEFAULT_THEME_ID, getTheme } from '../../src/data/themes';
 import { makeRepo } from './repo';
 
 const ANA = { name: 'Ana Lucía Hernández', email: 'ana@example.com' };
@@ -25,6 +26,19 @@ test('branch alias lists branches newest first, with slashes and a detached HEAD
   const r = repo.git(['recent']);
   expect(r.status, r.stderr).toBe(0);
   expect(r.stdout.trim().split('\n')).toEqual(['2026-03-01 feature/login', '2026-02-01 main', '2026-01-01 fix/x']);
+}, 60_000);
+
+test('themed branch alias prints its colors', () => {
+  const repo = makeRepo('branchcolor');
+  repo.commit('one', ANA, '2026-01-01T10:00:00');
+  const themed = applyThemeToBranchRecipe(DEFAULT_BRANCH_RECIPE, getTheme(DEFAULT_THEME_ID));
+  repo.alias('recent', buildBranchAliasValue(themed));
+  // --color=auto in the alias means plain text in a pipe; the user's terminal gets colors.
+  expect(repo.git(['recent']).stdout).not.toContain('\x1b[');
+  const forced = repo.git(['recent', '--color=always']);
+  expect(forced.status, forced.stderr).toBe(0);
+  expect(forced.stdout).toContain('\x1b[38;2;');
+  expect(plain(forced.stdout).trim()).toBe('2026-01-01 main');
 }, 60_000);
 
 test('author chart keeps full names and scales bars to the max width', () => {

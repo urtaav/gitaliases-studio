@@ -26,6 +26,15 @@ describe('format atoms', () => {
   test('ahead/behind', () => expect(one({}, 'track')).toBe('%(upstream:track)'));
 });
 
+test('colored recipes ask for color, plain ones stay exactly the classic alias', () => {
+  // for-each-ref ignores %(color:…) unless --color is given, even with color.ui=always.
+  const colored = { ...DEFAULT_BRANCH_RECIPE, fields: [makeBranchField('name', { color: '#FF9EBE' })] };
+  expect(buildBranchAliasValue(colored)).toMatch(/^for-each-ref --color=auto --sort=-committerdate /);
+  const sepColored = { ...DEFAULT_BRANCH_RECIPE, separator: '│', separatorColor: '#4B5263' };
+  expect(buildBranchAliasValue(sepColored)).toContain('--color=auto');
+  expect(buildBranchAliasValue(DEFAULT_BRANCH_RECIPE)).not.toContain('--color');
+});
+
 test('options: sort, count and scope', () => {
   const r: BranchRecipe = { ...DEFAULT_BRANCH_RECIPE, sort: 'refname', count: 5, scope: 'both' };
   expect(buildBranchAliasValue(r)).toMatch(/^for-each-ref --sort=refname --count=5 --format='.*' refs\/heads\/ refs\/remotes\/$/);

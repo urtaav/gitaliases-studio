@@ -23,8 +23,9 @@
     },
     {
       "name": "hist",
-      "value": "log --graph --date=short --pretty=format:\"%h %ad | %s%d [%an]\"",
-      "description": "History with dates, authors and branches.",
+      "designer": "log",
+      "preset": "hist",
+      "description": "History with date, time, author and branches, in color.",
       "example": "git hist"
     },
     {

@@ -29,8 +29,9 @@
     },
     {
       "name": "recent",
-      "value": "branch --sort=-committerdate",
-      "description": "Branches ordered by most recent work.",
+      "designer": "branches",
+      "preset": "recent",
+      "description": "Your branches, newest first, with the date of their last commit.",
       "example": "git recent"
     },
     {

@@ -4,30 +4,57 @@
   "title": "Undo & fix",
   "entries": [
     {
-      "name": "undo",
-      "value": "reset --soft HEAD~1",
-      "description": "Undo your last commit but keep its changes staged.",
-      "example": "git undo"
-    },
-    {
       "name": "unstage",
-      "value": "restore --staged",
+      "designer": "undo",
+      "preset": "unstage",
       "description": "Take files out of the staging area without losing changes.",
       "example": "git unstage app.js"
     },
     {
+      "name": "undo",
+      "designer": "undo",
+      "preset": "undo",
+      "description": "Undo your last commit but keep its changes staged.",
+      "example": "git undo"
+    },
+    {
+      "name": "reword",
+      "designer": "undo",
+      "preset": "reword",
+      "description": "Rewrite the message of your last commit.",
+      "example": "git reword",
+      "risk": "careful"
+    },
+    {
+      "name": "revert-last",
+      "designer": "undo",
+      "preset": "revert-last",
+      "description": "Cancel your last commit with a new commit; safe after pushing.",
+      "example": "git revert-last"
+    },
+    {
       "name": "discard",
-      "value": "checkout -- .",
-      "description": "Throw away unstaged changes in tracked files.",
-      "example": "git discard",
-      "warning": "Changes you discard cannot be recovered."
+      "designer": "undo",
+      "preset": "discard",
+      "description": "Throw away unstaged changes in the files you name. Asks before running.",
+      "example": "git discard app.js",
+      "risk": "destructive"
     },
     {
       "name": "wipe",
-      "value": "reset --hard HEAD",
-      "description": "Return every tracked file to the last commit.",
+      "designer": "undo",
+      "preset": "wipe",
+      "description": "Return every tracked file to the last commit. Asks before running.",
       "example": "git wipe",
-      "warning": "Deletes all uncommitted work in tracked files."
+      "risk": "destructive"
+    },
+    {
+      "name": "cleanup",
+      "designer": "undo",
+      "preset": "cleanup",
+      "description": "Delete untracked files and folders. Asks before running.",
+      "example": "git cleanup",
+      "risk": "destructive"
     }
   ]
 }

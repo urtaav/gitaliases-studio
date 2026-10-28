@@ -32,7 +32,7 @@
       "value": "commit --amend --no-edit",
       "description": "Add staged changes to your last commit, keeping its message.",
       "example": "git amend",
-      "warning": "Rewrites your last commit. Avoid it if you already pushed."
+      "risk": "careful"
     }
   ]
 }

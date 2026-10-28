@@ -3,14 +3,19 @@ import { copy } from '../copy';
 import { AliasForm } from '../components/AliasForm';
 import { CATALOG, type CatalogEntry } from '../data/catalog';
 import { inferType } from '../core/validate';
+import { RiskAck } from '../components/RiskAck';
+import { RiskChip } from '../components/RiskChip';
+import { openInDesigner } from './openInDesigner';
 import { useWorkspace } from '../state/WorkspaceContext';
 import type { Alias } from '../core/types';
 
 const toAlias = (e: CatalogEntry): Alias => ({
   name: e.name,
   value: e.value,
-  type: inferType(e.value),
+  type: e.designer ?? inferType(e.value),
   description: e.description,
+  ...(e.recipe ? { recipe: e.recipe } : {}),
+  ...(e.risk ? { risk: e.risk } : {}),
 });
 
 export function CatalogTab() {
@@ -18,6 +23,9 @@ export function CatalogTab() {
   const [query, setQuery] = useState('');
   const [clash, setClash] = useState<CatalogEntry | null>(null);
   const [renaming, setRenaming] = useState<CatalogEntry | null>(null);
+  // Destructive entries wait here until the user accepts the risk.
+  const [pendingRisk, setPendingRisk] = useState<CatalogEntry | null>(null);
+  const [ack, setAck] = useState(false);
 
   const q = query.trim().toLowerCase();
   const groups = CATALOG.map((g) => ({
@@ -30,13 +38,19 @@ export function CatalogTab() {
   const existing = (name: string) => state.aliases.find((a) => a.name.toLowerCase() === name);
   const names = state.aliases.map((a) => a.name);
 
-  const add = (e: CatalogEntry) => {
+  const add = (e: CatalogEntry, accepted = false) => {
+    if (e.risk === 'destructive' && !accepted) {
+      setPendingRisk(e);
+      setAck(false);
+      return;
+    }
     const mine = existing(e.name);
     if (mine && mine.value !== e.value) {
       setClash(e);
       return;
     }
     dispatch({ type: 'upsert', alias: toAlias(e) });
+    setPendingRisk(null);
   };
 
   return (
@@ -88,10 +102,21 @@ export function CatalogTab() {
                   <div className="alias-cmd">
                     example <code>{e.example}</code>
                   </div>
-                  {e.warning && (
-                    <p className="help" style={{ color: 'var(--warn)' }}>
-                      {copy.catalog.warning}: {e.warning}
-                    </p>
+                  <div className="alias-meta">
+                    <RiskChip risk={e.risk} />
+                  </div>
+                  {pendingRisk === e && (
+                    <div className="dialog">
+                      <RiskAck risk="destructive" checked={ack} onChange={setAck} message={e.description} />
+                      <div className="btn-row" style={{ marginTop: 8 }}>
+                        <button type="button" className="btn btn-small btn-primary" disabled={!ack} onClick={() => add(e, true)}>
+                          {copy.catalog.add}
+                        </button>
+                        <button type="button" className="btn btn-small" onClick={() => setPendingRisk(null)}>
+                          {copy.form.cancel}
+                        </button>
+                      </div>
+                    </div>
                   )}
                   {clash === e && mine && (
                     <div className="dialog notice notice-warn" role="group" aria-label={copy.catalog.clashTitle(e.name)}>
@@ -127,7 +152,18 @@ export function CatalogTab() {
                     </div>
                   )}
                   <footer>
-                    <span />
+                    {e.designer ? (
+                      <button
+                        type="button"
+                        className="btn btn-small"
+                        onClick={() => openInDesigner(toAlias(e), dispatch)}
+                        aria-label={`${copy.catalog.customize} git ${e.name}`}
+                      >
+                        {copy.catalog.customize}
+                      </button>
+                    ) : (
+                      <span />
+                    )}
                     <button
                       type="button"
                       className={`btn btn-small${isAdded ? '' : ' btn-primary'}`}

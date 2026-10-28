@@ -1,0 +1,28 @@
+{
+  "id": "charts",
+  "order": 7,
+  "title": "Charts & stats",
+  "entries": [
+    {
+      "name": "activity",
+      "designer": "chart",
+      "preset": "activity",
+      "description": "Commits per day over the last 60 days, as bars.",
+      "example": "git activity"
+    },
+    {
+      "name": "authors",
+      "designer": "chart",
+      "preset": "authors",
+      "description": "Who commits the most, as bars.",
+      "example": "git authors"
+    },
+    {
+      "name": "churn",
+      "designer": "chart",
+      "preset": "churn",
+      "description": "The 20 files that change the most, as bars.",
+      "example": "git churn"
+    }
+  ]
+}

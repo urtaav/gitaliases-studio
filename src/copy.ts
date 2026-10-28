@@ -153,7 +153,7 @@ export const copy = {
     clashReplace: 'Replace mine',
     clashRename: 'Add with another name',
     clashCancel: 'Keep mine',
-    warning: 'Careful',
+    customize: 'Customize',
   },
 
   log: {

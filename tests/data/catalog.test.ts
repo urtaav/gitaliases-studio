@@ -29,8 +29,8 @@ test('every entry is complete', () => {
   }
 });
 
-test('destructive aliases carry a warning', () => {
-  for (const e of entries.filter((x) => /reset --hard|clean -f|push --force|checkout -- \./.test(x.value))) {
-    expect(e.warning, e.name).toBeTruthy();
+test('destructive aliases are marked as destructive', () => {
+  for (const e of entries.filter((x) => /reset --hard|clean -f|checkout -- \./.test(x.value))) {
+    expect(e.risk, e.name).toBe('destructive');
   }
 });

@@ -3,15 +3,17 @@ import { copy } from '../copy';
 import { Notice } from '../components/Notice';
 import { contrastRatio } from '../core/contrast';
 import { cssColor } from '../core/colors';
+import { CommandExplain } from '../components/CommandExplain';
 import {
   buildLogAliasValue,
+  explainLog,
   MARKERS,
   validateDateFormat,
   validateSeparator,
   type LogRecipe,
   type Marker,
 } from '../core/logFormat';
-import { parseLogAliasValue } from '../core/logParse';
+import { recipeOf } from './openInDesigner';
 import { validateName } from '../core/validate';
 import { fieldDef } from '../data/fields';
 import { applyThemeToRecipe, getTheme } from '../data/themes';
@@ -76,6 +78,7 @@ export function LogDesignerTab() {
       </header>
 
       <PreviewPane recipe={r} meName={state.meName} terminalBg={state.terminalBg} terminalFg={terminalFg} aliasName={name} focusUid={focusUid} />
+      <CommandExplain parts={explainLog(r)} focus={focusUid} onFocus={setFocusUid} />
 
       <div className="designer">
         <div>
@@ -112,7 +115,7 @@ export function LogDesignerTab() {
                   const alias = name.toLowerCase();
                   dispatch({
                     type: 'upsert',
-                    alias: { name: alias, value: buildLogAliasValue(r), type: 'log', recipe: r },
+                    alias: { name: alias, value: buildLogAliasValue(r), type: 'log', recipe: { kind: 'log', log: r } },
                     originalName: existing ? existing.name : undefined,
                   });
                   setSaved(alias);
@@ -132,13 +135,13 @@ export function LogDesignerTab() {
                 onChange={(e) => {
                   const a = logAliases.find((x) => x.name === e.target.value);
                   if (!a) return;
-                  const recipe = a.recipe ?? parseLogAliasValue(a.value);
-                  if (!recipe) {
+                  const recipe = recipeOf(a);
+                  if (recipe?.kind !== 'log') {
                     setLoadMsg(copy.log.loadFailed);
                     return;
                   }
                   setLoadMsg('');
-                  dispatch({ type: 'setDraft', draft: recipe, name: a.name });
+                  dispatch({ type: 'setDraft', draft: recipe.log, name: a.name });
                 }}
               >
                 <option value="">{logAliases.length ? '—' : copy.log.loadNone}</option>

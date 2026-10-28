@@ -122,7 +122,7 @@ input[type='color'] {
 .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
 .field > label, .field > .label { font-weight: 700; font-size: 13px; }
 .help { color: var(--muted); font-size: 12.5px; }
-.inline-field { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; }
+.inline-field { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; flex-wrap: wrap; max-width: 100%; }
 .check { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
 .issues { margin: 4px 0 0; padding: 0; list-style: none; color: var(--warn); font-size: 12.5px; }
 
@@ -203,6 +203,9 @@ input[type='color'] {
 .term-body .seg-hi { background: color-mix(in srgb, currentColor 22%, transparent); border-radius: 2px; }
 .designer { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px; margin-top: 16px; }
 @media (max-width: 980px) { .designer { grid-template-columns: 1fr; } }
+/* Grid items default to min-width: auto, which lets long field rows push past the window on phones. */
+.designer > * { min-width: 0; }
+.inline-field.field { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; }
 .field-list { list-style: none; margin: 0 0 12px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .field-item { border: 1px solid var(--line); border-radius: 6px; background: var(--bg); }
 .field-item.is-drag-over { border-color: var(--accent); }

@@ -2,10 +2,15 @@
 
 Import, design and apply git aliases visually. Everything runs in your browser.
 
+- **Start**: pick what you want to do, in plain words.
 - **My aliases**: bring in the aliases you already have and edit them.
-- **Catalog**: add popular aliases, each explained in plain words.
-- **Log designer**: choose what each line of `git log` shows, in your order and colors.
-- **Apply**: get commands that work in PowerShell, Bash/zsh or Command Prompt, or one file for everything.
+- **Catalog**: add popular aliases, each explained, or open them in a designer with **Customize**.
+- **Designers**: build aliases from options, with a live preview and a part-by-part explanation of the command:
+  - **History**: what each line of `git log` shows, in your order and colors.
+  - **Branches**: your branches, newest first, with the details you choose.
+  - **Charts**: commits per day, week or author, or the most changed files, as bars that always fit.
+  - **Undo**: tell it what happened and get the right command. Commands that can delete work need your explicit OK and ask before running.
+- **Apply**: get commands that work in PowerShell (5.1 and 7), Bash/zsh or Command Prompt, or one file for everything.
 
 Live site: `https://OWNER.github.io/gitaliases-studio/`
 

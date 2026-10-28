@@ -2,6 +2,7 @@ import { COLOR_ATTRS, fromSgr, type ColorAttr } from './colors';
 import { FIELD_DEFS } from '../data/fields';
 import {
   buildLogAliasValue,
+  DEFAULT_RECIPE,
   MARKERS,
   newUid,
   type Align,
@@ -201,13 +202,16 @@ function parse(v: string): LogRecipe | null {
     graph,
     all,
     maxCount,
-    highlight: {
-      enabled: highlight,
-      marker,
-      color: hlColor || '#98C379',
-      bold: hlBold,
-      pager: highlight ? / \| less -RFX; \}; f$/.test(v) : true,
-    },
+    // A plain log alias carries no highlight settings, so keep the defaults for when it is turned on.
+    highlight: highlight
+      ? {
+          enabled: true,
+          marker,
+          color: hlColor || DEFAULT_RECIPE.highlight.color,
+          bold: hlBold,
+          pager: / \| less -RFX; \}; f$/.test(v),
+        }
+      : { ...DEFAULT_RECIPE.highlight, enabled: false },
   };
 
   // Only accept what we can reproduce exactly; anything else is edited as raw text.

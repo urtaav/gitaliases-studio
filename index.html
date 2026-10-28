@@ -3,11 +3,91 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Import, design and apply git aliases visually. Everything runs in your browser." />
-    <title>GitAliases Studio</title>
+
+    <title>GitAliases Studio · Create, explain and apply git aliases visually</title>
+    <meta
+      name="description"
+      content="Free visual tool to create git aliases without memorizing syntax. Design your git log, see recent branches, draw commit charts, undo safely, and get commands that work in PowerShell, Bash and zsh. Runs in your browser; nothing is uploaded."
+    />
+    <meta
+      name="keywords"
+      content="git aliases, git alias generator, git config alias, git log format, git log pretty, git shortcuts, git cheat sheet, powershell git alias, gitconfig, alias de git"
+    />
+    <meta name="author" content="urtaav" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://urtaav.github.io/gitaliases-studio/" />
+    <link rel="alternate" hreflang="en" href="https://urtaav.github.io/gitaliases-studio/" />
+    <link rel="alternate" hreflang="es" href="https://urtaav.github.io/gitaliases-studio/" />
+    <link rel="alternate" hreflang="x-default" href="https://urtaav.github.io/gitaliases-studio/" />
+
+    <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#15111F" />
+    <meta name="color-scheme" content="dark light" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="GitAliases Studio" />
+    <meta property="og:title" content="GitAliases Studio · Git aliases without the syntax" />
+    <meta
+      property="og:description"
+      content="Create, explain and apply git aliases visually. Commands that work the first time in PowerShell, Bash and zsh."
+    />
+    <meta property="og:url" content="https://urtaav.github.io/gitaliases-studio/" />
+    <meta property="og:image" content="https://urtaav.github.io/gitaliases-studio/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="GitAliases Studio: a terminal-style page that turns a long git command into a short alias." />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="es_MX" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="GitAliases Studio · Git aliases without the syntax" />
+    <meta
+      name="twitter:description"
+      content="Create, explain and apply git aliases visually. Commands that work the first time in PowerShell, Bash and zsh."
+    />
+    <meta name="twitter:image" content="https://urtaav.github.io/gitaliases-studio/og-image.png" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "GitAliases Studio",
+        "url": "https://urtaav.github.io/gitaliases-studio/",
+        "image": "https://urtaav.github.io/gitaliases-studio/icon-512.png",
+        "description": "Visual tool to create, explain and apply git aliases: history designer, branch lists, commit charts, a guided undo assistant and commands for PowerShell, Bash and zsh.",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Windows, macOS, Linux",
+        "browserRequirements": "Requires JavaScript",
+        "inLanguage": ["en", "es"],
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+        "license": "https://opensource.org/licenses/MIT",
+        "codeRepository": "https://github.com/urtaav/gitaliases-studio",
+        "author": { "@type": "Person", "name": "urtaav", "url": "https://github.com/urtaav" }
+      }
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Shown until the app starts, and to crawlers or browsers without JavaScript. -->
+      <main style="max-width: 720px; margin: 48px auto; padding: 0 16px; font-family: ui-monospace, Consolas, monospace; color: #dcd5ee; background: #15111f">
+        <h1>GitAliases Studio</h1>
+        <p>
+          A free visual tool to create, explain and apply git aliases without memorizing syntax. Pick aliases from a
+          catalog, design how <code>git log</code> looks, list your recent branches, draw commit charts in the terminal
+          and undo mistakes safely. You get commands that work the first time in PowerShell, Bash and zsh, or one
+          <code>.gitaliases</code> file for everything. Available in English and Spanish.
+        </p>
+        <p>
+          Una herramienta gratuita para crear, entender y aplicar alias de git sin memorizar la sintaxis, en inglés y
+          español.
+        </p>
+        <noscript><p>This tool runs in your browser and needs JavaScript to be enabled.</p></noscript>
+        <p><a href="https://github.com/urtaav/gitaliases-studio" style="color: #b9a3ff">Source code on GitHub</a></p>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

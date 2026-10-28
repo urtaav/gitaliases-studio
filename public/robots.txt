@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://urtaav.github.io/gitaliases-studio/sitemap.xml

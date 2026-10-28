@@ -8,18 +8,13 @@ import { describeAlias } from '../core/validate';
 import { detectRisk } from '../core/risk';
 import { RiskChip } from '../components/RiskChip';
 import { openInDesigner } from './openInDesigner';
+import { explainAlias } from '../core/explainAlias';
+import { CommandExplain } from '../components/CommandExplain';
+import { ExplainAny } from '../components/ExplainAny';
 import { navigate } from '../app/router';
 import { useWorkspace } from '../state/WorkspaceContext';
 import type { Alias, ChangeKind } from '../core/types';
 
-const TYPE_LABEL: Record<Alias['type'], string> = {
-  shortcut: 'shortcut',
-  shell: 'shell',
-  log: 'log view',
-  branches: 'branch list',
-  chart: 'chart',
-  undo: 'undo',
-};
 
 function ImportPanel({ onDone }: { onDone(): void }) {
   const { state, dispatch, changes } = useWorkspace();
@@ -124,7 +119,7 @@ function ImportPanel({ onDone }: { onDone(): void }) {
 
 function ChangeChip({ kind }: { kind?: ChangeKind }) {
   if (!kind) return null;
-  const label = { added: 'new', edited: 'edited', removed: 'removed' }[kind];
+  const label = copy.aliases.changes[kind];
   return <span className={`chip chip-${kind}`}>{label}</span>;
 }
 
@@ -176,6 +171,8 @@ export function AliasesTab() {
         <Notice tone="ok">{copy.aliases.importDone(state.baseline.length)}</Notice>
       )}
 
+      <ExplainAny />
+
       <div className="list-head" style={{ marginTop: 20 }}>
         <span className="muted">{copy.aliases.count(state.aliases.length)}</span>
         <div className="btn-row">
@@ -226,11 +223,12 @@ export function AliasesTab() {
                     {copy.aliases.youType}: <code>git {a.name}</code> → <code>{a.value}</code>
                   </div>
                   <div className="alias-meta">
-                    <span className="chip">{TYPE_LABEL[a.type]}</span>
+                    <span className="chip">{copy.aliases.types[a.type]}</span>
                     <RiskChip risk={a.risk ?? detectRisk(a.value)} />
                     <ChangeChip kind={kind} />
                     {isRemoved && <span className="help">{copy.aliases.removedNote}</span>}
                   </div>
+                  <CommandExplain parts={explainAlias(a)} compact />
                 </div>
                 <div className="btn-row">
                   {isRemoved ? (

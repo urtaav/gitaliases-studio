@@ -32,7 +32,8 @@ export function openInDesigner(a: Alias, dispatch: Dispatch<Action>): boolean {
       navigate({ page: 'studio', tab: 'chart' });
       break;
     case 'undo':
-      dispatch({ type: 'setUndoDraft', draft: { ...r.undo, name: a.name } });
+      // The risk is accepted per alias, never carried over from a previous one.
+      dispatch({ type: 'setUndoDraft', draft: { ...r.undo, name: a.name, acknowledged: false } });
       navigate({ page: 'studio', tab: 'undo' });
       break;
   }

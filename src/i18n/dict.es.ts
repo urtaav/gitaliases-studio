@@ -37,6 +37,14 @@ export const dictEs: typeof dictEn = {
     blame: 'Muestra quién cambió por última vez cada línea de un archivo',
   },
 
+  global: {
+    '-p': 'Muestra la salida página por página',
+    '--paginate': 'Muestra la salida página por página',
+    '--no-pager': 'Imprime todo de una vez, sin paginar',
+    '-c': 'Cambia un ajuste solo para esta ejecución',
+    '-C': 'Se ejecuta como si git empezara en esta carpeta',
+  },
+
   flags: {
     '*': {
       '--all': 'Incluye todas las ramas',

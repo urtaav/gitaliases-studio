@@ -36,6 +36,15 @@ export const dictEn = {
     blame: 'Show who last changed each line of a file',
   } as Record<string, string>,
 
+  /** Options that go between "git" and the subcommand. */
+  global: {
+    '-p': 'Show the output page by page',
+    '--paginate': 'Show the output page by page',
+    '--no-pager': 'Print everything at once, without paging',
+    '-c': 'Change a setting only for this run',
+    '-C': 'Run as if git was started in this folder',
+  } as Record<string, string>,
+
   flags: {
     '*': {
       '--all': 'Include every branch',

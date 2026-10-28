@@ -64,10 +64,20 @@ const part = (text: string, explanation: string): CommandPart => ({ text, explan
 /** Explains `git <sub> <args…>` given the tokens after "git". */
 export function explainGitTokens(tokens: string[]): CommandPart[] {
   const d = copy.dict;
-  const [sub, ...rest] = tokens;
-  if (!sub) return [];
+  const parts: CommandPart[] = [];
+  let i = 0;
+  // Global options come before the subcommand: git -p log, git -c x=y status, git -C dir log.
+  while (i < tokens.length && tokens[i]!.startsWith('-')) {
+    const opt = tokens[i]!;
+    const takesValue = opt === '-c' || opt === '-C';
+    const text = takesValue && tokens[i + 1] ? `${opt} ${tokens[i + 1]}` : opt;
+    parts.push(part(text, d.global[opt] ?? d.words.option(opt)));
+    i += takesValue ? 2 : 1;
+  }
+  const [sub, ...rest] = tokens.slice(i);
+  if (!sub) return parts;
   const flags = { ...d.flags['*'], ...(d.flags[sub] ?? {}) };
-  const parts = [part(sub, d.sub[sub] ?? d.words.unknownSub(sub))];
+  parts.push(part(sub, d.sub[sub] ?? d.words.unknownSub(sub)));
   for (const tok of rest) {
     if (tok === '"$@"' || tok === '$@') {
       parts.push(part(tok, d.words.args));

@@ -1,0 +1,38 @@
+{
+  "id": "commits",
+  "order": 3,
+  "title": "Commits",
+  "entries": [
+    {
+      "name": "aa",
+      "value": "add --all",
+      "description": "Stage every change, including new and deleted files.",
+      "example": "git aa"
+    },
+    {
+      "name": "ci",
+      "value": "commit",
+      "description": "Open the editor to write a commit.",
+      "example": "git ci"
+    },
+    {
+      "name": "cm",
+      "value": "commit -m",
+      "description": "Commit with a message in one line.",
+      "example": "git cm \"fix: typo\""
+    },
+    {
+      "name": "cam",
+      "value": "commit -a -m",
+      "description": "Stage tracked files and commit with a message.",
+      "example": "git cam \"docs: update readme\""
+    },
+    {
+      "name": "amend",
+      "value": "commit --amend --no-edit",
+      "description": "Add staged changes to your last commit, keeping its message.",
+      "example": "git amend",
+      "warning": "Rewrites your last commit. Avoid it if you already pushed."
+    }
+  ]
+}

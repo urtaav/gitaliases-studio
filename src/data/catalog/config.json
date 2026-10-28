@@ -1,0 +1,19 @@
+{
+  "id": "config",
+  "order": 7,
+  "title": "Config & aliases",
+  "entries": [
+    {
+      "name": "aliases",
+      "value": "config --get-regexp alias",
+      "description": "List all your aliases.",
+      "example": "git aliases"
+    },
+    {
+      "name": "conf",
+      "value": "config --global --edit",
+      "description": "Open your global git settings in your editor.",
+      "example": "git conf"
+    }
+  ]
+}

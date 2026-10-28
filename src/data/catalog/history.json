@@ -1,0 +1,37 @@
+{
+  "id": "history",
+  "order": 6,
+  "title": "History",
+  "entries": [
+    {
+      "name": "lg",
+      "value": "log --oneline --graph --decorate",
+      "description": "Compact history with the branch graph.",
+      "example": "git lg"
+    },
+    {
+      "name": "last",
+      "value": "log -1 HEAD --stat",
+      "description": "Show the last commit and the files it touched.",
+      "example": "git last"
+    },
+    {
+      "name": "today",
+      "value": "log --since=midnight --oneline",
+      "description": "Commits made since midnight.",
+      "example": "git today"
+    },
+    {
+      "name": "hist",
+      "value": "log --graph --date=short --pretty=format:\"%h %ad | %s%d [%an]\"",
+      "description": "History with dates, authors and branches.",
+      "example": "git hist"
+    },
+    {
+      "name": "filelog",
+      "value": "log -p --follow",
+      "description": "Every change made to one file, across renames.",
+      "example": "git filelog src/app.js"
+    }
+  ]
+}

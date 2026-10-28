@@ -1,0 +1,37 @@
+{
+  "id": "status",
+  "order": 1,
+  "title": "Status & info",
+  "entries": [
+    {
+      "name": "st",
+      "value": "status -sb",
+      "description": "Short status that also shows your branch.",
+      "example": "git st"
+    },
+    {
+      "name": "df",
+      "value": "diff",
+      "description": "Show changes you have not staged yet.",
+      "example": "git df"
+    },
+    {
+      "name": "dfs",
+      "value": "diff --staged",
+      "description": "Show changes that are staged for the next commit.",
+      "example": "git dfs"
+    },
+    {
+      "name": "who",
+      "value": "shortlog -sn",
+      "description": "List contributors by number of commits.",
+      "example": "git who"
+    },
+    {
+      "name": "whoami",
+      "value": "config user.email",
+      "description": "Show the email git puts on your commits.",
+      "example": "git whoami"
+    }
+  ]
+}

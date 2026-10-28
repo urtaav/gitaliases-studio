@@ -1,0 +1,33 @@
+{
+  "id": "undo",
+  "order": 4,
+  "title": "Undo & fix",
+  "entries": [
+    {
+      "name": "undo",
+      "value": "reset --soft HEAD~1",
+      "description": "Undo your last commit but keep its changes staged.",
+      "example": "git undo"
+    },
+    {
+      "name": "unstage",
+      "value": "restore --staged",
+      "description": "Take files out of the staging area without losing changes.",
+      "example": "git unstage app.js"
+    },
+    {
+      "name": "discard",
+      "value": "checkout -- .",
+      "description": "Throw away unstaged changes in tracked files.",
+      "example": "git discard",
+      "warning": "Changes you discard cannot be recovered."
+    },
+    {
+      "name": "wipe",
+      "value": "reset --hard HEAD",
+      "description": "Return every tracked file to the last commit.",
+      "example": "git wipe",
+      "warning": "Deletes all uncommitted work in tracked files."
+    }
+  ]
+}

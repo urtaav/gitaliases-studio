@@ -1,0 +1,38 @@
+{
+  "id": "sync",
+  "order": 5,
+  "title": "Sync",
+  "entries": [
+    {
+      "name": "pl",
+      "value": "pull",
+      "description": "Get and merge the latest changes from the remote.",
+      "example": "git pl"
+    },
+    {
+      "name": "up",
+      "value": "pull --rebase --autostash",
+      "description": "Update your branch, replaying your commits on top.",
+      "example": "git up"
+    },
+    {
+      "name": "ps",
+      "value": "push",
+      "description": "Send your commits to the remote.",
+      "example": "git ps"
+    },
+    {
+      "name": "pf",
+      "value": "push --force-with-lease",
+      "description": "Force-push only if nobody else pushed in the meantime.",
+      "example": "git pf",
+      "warning": "Rewrites history on the remote. Use it on your own branches only."
+    },
+    {
+      "name": "fa",
+      "value": "fetch --all --prune",
+      "description": "Download all remotes and forget deleted branches.",
+      "example": "git fa"
+    }
+  ]
+}

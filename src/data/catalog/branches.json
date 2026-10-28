@@ -1,0 +1,43 @@
+{
+  "id": "branches",
+  "order": 2,
+  "title": "Branches",
+  "entries": [
+    {
+      "name": "co",
+      "value": "checkout",
+      "description": "Switch to a branch or restore files.",
+      "example": "git co main"
+    },
+    {
+      "name": "cb",
+      "value": "checkout -b",
+      "description": "Create a new branch and switch to it.",
+      "example": "git cb feature/login"
+    },
+    {
+      "name": "sw",
+      "value": "switch",
+      "description": "Switch to another branch (newer, safer command).",
+      "example": "git sw main"
+    },
+    {
+      "name": "br",
+      "value": "branch",
+      "description": "List your local branches.",
+      "example": "git br"
+    },
+    {
+      "name": "recent",
+      "value": "branch --sort=-committerdate",
+      "description": "Branches ordered by most recent work.",
+      "example": "git recent"
+    },
+    {
+      "name": "bd",
+      "value": "branch -d",
+      "description": "Delete a branch that is already merged.",
+      "example": "git bd old-branch"
+    }
+  ]
+}

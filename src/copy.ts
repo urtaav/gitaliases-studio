@@ -164,7 +164,11 @@ export const copy = {
         title: 'Remove the old aliases from your settings',
         body: 'They now live in the file, so git keeps a single copy. If it says "no such section", that is fine.',
       },
-      include: { title: 'Connect the file to git', body: 'Run this once. Later updates only need a new download.' },
+      include: {
+        title: 'Connect the file to git',
+        body:
+          'Run this once. Later updates only need a new download. To list your aliases afterwards, use git config --get-regexp alias without --global: with --global, git skips included files.',
+      },
       test: { title: 'Try one of your aliases', body: 'If it runs, you are done.' },
     },
     noImportNote:

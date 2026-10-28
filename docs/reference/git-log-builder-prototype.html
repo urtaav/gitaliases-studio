@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Formato de git log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #EEF0F3;
+    --panel: #FFFFFF;
+    --ink: #1D2330;
+    --muted: #5D6677;
+    --line: #D5DAE1;
+    --accent: #3B5BDB;
+    --accent-ink: #FFFFFF;
+    --warn-bg: #FFF4DB;
+    --warn-ink: #6B4E00;
+    --sans: "IBM Plex Sans", system-ui, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #171A21;
+      --panel: #1F232C;
+      --ink: #E3E7EE;
+      --muted: #9AA3B2;
+      --line: #2E3440;
+      --accent: #8EA4FF;
+      --accent-ink: #131722;
+      --warn-bg: #3A3020;
+      --warn-ink: #F2D59A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #171A21;
+    --panel: #1F232C;
+    --ink: #E3E7EE;
+    --muted: #9AA3B2;
+    --line: #2E3440;
+    --accent: #8EA4FF;
+    --accent-ink: #131722;
+    --warn-bg: #3A3020;
+    --warn-ink: #F2D59A;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 400 15px/1.5 var(--sans);
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 32px 16px 64px; }
+
+  header { margin-bottom: 20px; }
+  h1 { font-size: 28px; line-height: 1.2; font-weight: 600; margin: 0 0 6px; letter-spacing: -0.01em; }
+  header p { margin: 0; color: var(--muted); max-width: 64ch; }
+  h2 { font-size: 17px; font-weight: 600; margin: 0 0 12px; }
+
+  /* Terminal de vista previa */
+  .term {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 1px 0 var(--line), 0 12px 32px -18px rgba(20, 24, 40, .55);
+  }
+  .term-bar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 14px;
+    font: 400 12px/1 var(--mono);
+    background: color-mix(in srgb, var(--tbg) 80%, #000);
+    color: color-mix(in srgb, var(--tfg) 60%, transparent);
+  }
+  .term-bar label { display: flex; align-items: center; gap: 6px; margin-left: auto; cursor: pointer; }
+  .term-bar input[type=color] { width: 22px; height: 18px; border: 0; padding: 0; background: none; cursor: pointer; }
+  .term-body {
+    background: var(--tbg);
+    color: var(--tfg);
+    font: 400 13.5px/1.65 var(--mono);
+    padding: 14px 16px 18px;
+    overflow-x: auto;
+    white-space: pre;
+    min-height: 220px;
+  }
+  .term-body .prompt { color: color-mix(in srgb, var(--tfg) 55%, transparent); }
+  .term-body b { font-weight: 700; }
+  .term-body [data-col] { border-radius: 2px; transition: background-color .12s; }
+  .term-body[data-focus="hash"] [data-col="hash"],
+  .term-body[data-focus="date"] [data-col="date"],
+  .term-body[data-focus="author"] [data-col="author"],
+  .term-body[data-focus="subject"] [data-col="subject"],
+  .term-body[data-focus="refs"] [data-col="refs"],
+  .term-body[data-focus="sep"] [data-col="sep"] {
+    background: color-mix(in srgb, var(--tfg) 16%, transparent);
+  }
+
+  .grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 16px; margin-top: 16px; }
+  /* Sin esto, las líneas largas de la terminal ensanchan la página en móvil */
+  .grid > *, .term, .out { min-width: 0; }
+  @media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .hint { color: var(--muted); font-size: 13.5px; margin: -6px 0 12px; }
+
+  /* Filas de columnas */
+  .cols { display: flex; flex-direction: column; gap: 6px; }
+  .col-row {
+    display: grid;
+    grid-template-columns: minmax(110px, 1fr) auto auto auto auto;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  .col-row:hover, .col-row:focus-within { border-color: var(--accent); }
+  .col-row.off .col-ctrl { opacity: .4; pointer-events: none; }
+  .col-name { display: flex; align-items: center; gap: 8px; font-weight: 500; }
+  .col-name small { color: var(--muted); font: 400 12px var(--mono); }
+  .col-ctrl { display: flex; align-items: center; gap: 6px; }
+  .order { display: flex; gap: 2px; }
+  @media (max-width: 560px) {
+    .col-row { grid-template-columns: 1fr auto; }
+    .col-row .col-name { grid-column: 1 / -1; }
+  }
+
+  .field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; }
+  .field > span { font-size: 13.5px; color: var(--muted); }
+  .inline { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .check { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+
+  input[type=text], input[type=number], select {
+    font: inherit;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 6px 8px;
+  }
+  input[type=number] { width: 64px; }
+  input[type=color] {
+    width: 30px; height: 26px; padding: 0;
+    border: 1px solid var(--line); border-radius: 6px; background: none; cursor: pointer;
+  }
+  input[type=checkbox] { accent-color: var(--accent); width: 16px; height: 16px; }
+  button {
+    font: 500 13.5px var(--sans);
+    color: var(--ink);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  button:hover { border-color: var(--accent); }
+  button.icon { padding: 3px 7px; font-family: var(--mono); }
+  button.bold-toggle[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  button:disabled { opacity: .35; cursor: default; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  fieldset { border: 0; padding: 0; margin: 0 0 14px; }
+  .sub {
+    margin-top: 10px; padding: 12px; border-radius: 8px;
+    background: var(--bg); border: 1px dashed var(--line);
+  }
+  .sub[hidden] { display: none; }
+
+  /* Comandos */
+  .out { margin-top: 16px; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 10px; }
+  .tabs button[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  .cmd { position: relative; margin-bottom: 12px; }
+  .cmd > span { display: block; font-size: 13.5px; color: var(--muted); margin-bottom: 4px; }
+  pre {
+    margin: 0;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px 84px 12px 12px;
+    font: 400 12.5px/1.6 var(--mono);
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  .copy { position: absolute; right: 8px; bottom: 8px; }
+  .note {
+    background: var(--warn-bg); color: var(--warn-ink);
+    border-radius: 8px; padding: 10px 12px; font-size: 13.5px; margin: 0 0 12px;
+  }
+  .note[hidden] { display: none; }
+  .err { color: #D9480F; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Arma tu git log</h1>
+    <p>Elige columnas, colores y anchos, revisa cómo se ve y copia el comando para crear el alias en tu terminal.</p>
+  </header>
+
+  <section class="term" aria-label="Vista previa">
+    <div class="term-bar">
+      <span id="promptLabel">git ltable</span>
+      <label>Fondo de tu terminal <input type="color" id="bg"></label>
+    </div>
+    <div class="term-body" id="preview"></div>
+  </section>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>Columnas</h2>
+      <p class="hint">Pasa el cursor por una columna para verla marcada en la vista previa. El ancho fijo recorta con «..» y rellena con espacios.</p>
+      <div class="cols" id="cols"></div>
+      <div class="col-row" id="refsRow" data-focus="refs" style="margin-top:6px">
+        <label class="col-name check"><input type="checkbox" id="refsOn"> Ramas y tags <small>%d</small></label>
+        <span></span><span></span><span></span>
+        <span class="col-ctrl" style="color:var(--muted);font-size:13px">siempre al final, color de git</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Estilo</h2>
+      <label class="field"><span>Tema</span>
+        <select id="theme">
+          <option value="onedark">One Dark</option>
+          <option value="nord">Nord</option>
+          <option value="gruvbox">Gruvbox</option>
+          <option value="mono">Monocromo</option>
+          <option value="custom">Personalizado</option>
+        </select>
+      </label>
+
+      <div class="field" data-focus="sep"><span>Separador</span>
+        <div class="inline">
+          <select id="sep">
+            <option value="│">│ línea</option>
+            <option value="|">| barra</option>
+            <option value="»">» comillas</option>
+            <option value="::">:: doble</option>
+            <option value="">solo espacios</option>
+          </select>
+          <input type="color" id="sepColor" aria-label="Color del separador">
+        </div>
+      </div>
+
+      <label class="field"><span>Fecha</span>
+        <select id="dateFmt">
+          <option value="short">2026-10-15</option>
+          <option value="relative">13 days ago (relativa)</option>
+          <option value="iso">2026-10-15 16:54</option>
+          <option value="dm">15-Oct 16:54</option>
+        </select>
+      </label>
+
+      <fieldset>
+        <label class="check"><input type="checkbox" id="graph"> Dibujar el grafo de ramas (--graph)</label>
+      </fieldset>
+
+      <fieldset>
+        <label class="check"><input type="checkbox" id="meOn"> Resaltar mis commits</label>
+        <div class="sub" id="meBox">
+          <div class="inline" style="margin-bottom:10px">
+            <select id="meMarker" aria-label="Marca">
+              <option value="▶">▶</option>
+              <option value="●">●</option>
+              <option value="★">★</option>
+              <option value="»">»</option>
+              <option value="*">*</option>
+            </select>
+            <input type="color" id="meColor" aria-label="Color de mis commits">
+            <button type="button" class="bold-toggle" id="meBold" aria-pressed="true" title="Negrita"><b>B</b></button>
+          </div>
+          <label class="field" style="margin:0"><span>Tu nombre en git, solo para la vista previa</span>
+            <input type="text" id="meName" autocomplete="off" spellcheck="false">
+          </label>
+          <p class="hint" style="margin:8px 0 0">El alias compara contra tu <code>git config user.email</code> al ejecutarse, así que funciona en cualquier repo.</p>
+        </div>
+      </fieldset>
+
+      <label class="field" style="margin:0"><span>Nombre del alias</span>
+        <input type="text" id="alias" autocomplete="off" spellcheck="false">
+        <span class="err" id="aliasErr" hidden>Usa letras, números o guiones, empezando con letra.</span>
+      </label>
+    </section>
+  </div>
+
+  <section class="panel out">
+    <h2>Comandos</h2>
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tabPs" aria-selected="true">PowerShell</button>
+      <button type="button" role="tab" id="tabSh" aria-selected="false">bash / Git Bash</button>
+    </div>
+    <p class="note" id="noteMe" hidden>Resaltar tus commits usa <code>sed</code> y <code>less</code>, que ya vienen con Git for Windows. En PowerShell necesitas la versión 7.3 o superior; Windows PowerShell 5.1 pierde las comillas dobles.</p>
+    <div class="cmd"><span>1. Respalda el alias actual, si ya existe</span><pre id="cmdBackup"></pre><button class="copy" type="button" data-copy="cmdBackup">Copiar</button></div>
+    <div class="cmd"><span>2. Crea o reemplaza el alias</span><pre id="cmdSet"></pre><button class="copy" type="button" data-copy="cmdSet">Copiar</button></div>
+    <div class="cmd"><span>3. Pruébalo</span><pre id="cmdTry"></pre><button class="copy" type="button" data-copy="cmdTry">Copiar</button></div>
+    <div class="cmd" style="margin:0"><span>Si quieres volver al anterior</span><pre id="cmdRestore"></pre><button class="copy" type="button" data-copy="cmdRestore">Copiar</button></div>
+  </section>
+</div>
+
+<script>
+const THEMES = {
+  onedark: { bg: '#282C34', fg: '#ABB2BF', hash: '#E5C07B', date: '#8A919E', author: '#61AFEF', sep: '#4B5263', me: '#98C379' },
+  nord:    { bg: '#2E3440', fg: '#D8DEE9', hash: '#EBCB8B', date: '#81A1C1', author: '#88C0D0', sep: '#4C566A', me: '#A3BE8C' },
+  gruvbox: { bg: '#282828', fg: '#EBDBB2', hash: '#FABD2F', date: '#A89984', author: '#83A598', sep: '#665C54', me: '#B8BB26' },
+  mono:    { bg: '#1E1E1E', fg: '#D4D4D4', hash: '#9E9E9E', date: '#707070', author: '#BDBDBD', sep: '#4A4A4A', me: '#FFFFFF' }
+};
+
+const COL_INFO = {
+  hash:    { label: 'Hash',    token: '%h' },
+  date:    { label: 'Fecha',   token: '%ad' },
+  author:  { label: 'Autor',   token: '%an' },
+  subject: { label: 'Mensaje', token: '%s' }
+};
+
+const DEFAULTS = {
+  alias: 'ltable',
+  theme: 'onedark',
+  bg: THEMES.onedark.bg,
+  fg: THEMES.onedark.fg,
+  sep: '│',
+  sepColor: THEMES.onedark.sep,
+  dateFmt: 'short',
+  graph: false,
+  refs: true,
+  cols: [
+    { id: 'hash',    on: true, color: THEMES.onedark.hash,   bold: false, width: 0 },
+    { id: 'date',    on: true, color: THEMES.onedark.date,   bold: false, width: 0 },
+    { id: 'author',  on: true, color: THEMES.onedark.author, bold: false, width: 18 },
+    { id: 'subject', on: true, color: '',                    bold: false, width: 0 }
+  ],
+  me: { on: true, marker: '▶', color: THEMES.onedark.me, bold: true, name: 'tu-usuario' }
+};
+
+// Commits de ejemplo; "me" marca los que serían tuyos.
+const SAMPLE = [
+  { h: 'd3a3ac7', me: true,  a: '',                     d: '2026-10-15T16:54', s: 'fix: corrige paginación del resumen', refs: [['HEAD', 'main'], ['origin/main']] },
+  { h: '30bf098', me: false, a: 'Ana Lucía Hernández',  d: '2026-10-15T16:18', s: 'feat: agrega filtro por periodo en la tabla de registros' },
+  { h: 'caef1dc', me: true,  a: '',                     d: '2026-10-15T12:18', s: "Merge branch 'main' into feat/consultas", refs: [['origin/feat/consultas']] },
+  { h: 'a9be6d5', me: false, a: 'Carlos Méndez',        d: '2026-10-09T10:02', s: 'docs: actualiza la guía de queries' },
+  { h: '3bc5574', me: false, a: 'Ana Lucía Hernández',  d: '2026-10-02T18:40', s: 'refactor: separa queries de conteo y filas', refs: [['tag: v1.2.0']] },
+  { h: 'f4be8cc', me: true,  a: '',                     d: '2026-09-24T09:15', s: 'chore: sube versión de Spring Boot' },
+  { h: '9e01b2a', me: false, a: 'dependabot[bot]',      d: '2026-09-20T03:11', s: 'build(deps): bump jackson-databind from 2.17.1 to 2.17.2' },
+  { h: '71c4d0e', me: false, a: 'Carlos Méndez',        d: '2026-09-18T13:27', s: 'test: cubre la exportación a CSV con subtablas' }
+];
+const NOW = new Date('2026-10-28T10:00');
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+let state = load();
+
+function load() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('gitlog-builder'));
+    if (saved && saved.cols && saved.me) return saved;
+  } catch (e) { /* sin storage: usa defaults */ }
+  return structuredClone(DEFAULTS);
+}
+function save() {
+  try { localStorage.setItem('gitlog-builder', JSON.stringify(state)); } catch (e) { /* ignorar */ }
+}
+
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(2, '0');
+
+// ── Construcción del alias ──────────────────────────────────────────
+
+function gitColor(color, bold) {
+  if (!color && !bold) return '';
+  return '%C(' + [bold ? 'bold' : '', color].filter(Boolean).join(' ') + ')';
+}
+
+function dateArg() {
+  switch (state.dateFmt) {
+    case 'relative': return '--date=relative';
+    case 'iso':      return "--date=format:'%Y-%m-%d %H:%M'";
+    case 'dm':       return "--date=format:'%d-%b %H:%M'";
+    default:         return '--date=short';
+  }
+}
+
+function hexToRgb(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+// Secuencia ANSI que inyecta sed (el formato de git no tiene condicionales).
+function ansi(color, bold) {
+  const parts = [];
+  if (bold) parts.push('1');
+  if (color) parts.push('38;2;' + hexToRgb(color).join(';'));
+  return '\\x1b[' + parts.join(';') + 'm';
+}
+
+function authorCol() { return state.cols.find(c => c.id === 'author'); }
+
+function buildFormat() {
+  const meOn = state.me.on;
+  const author = authorCol();
+  const segs = state.cols.filter(c => c.on).map(c => {
+    const width = c.width > 0 ? '%<(' + c.width + ',trunc)' : '';
+    const token = COL_INFO[c.id].token;
+    if (c.id === 'author' && meOn) {
+      // El color del autor lo pone sed según si el commit es tuyo.
+      return '~~%ae~~' + width + token + '%C(reset)';
+    }
+    const color = gitColor(c.color, c.bold);
+    return color + width + token + (color ? '%C(reset)' : '');
+  });
+
+  const sepText = state.sep.replace(/%/g, '%%');
+  const sep = sepText
+    ? ' ' + (state.sepColor ? '%C(' + state.sepColor + ')' + sepText + '%C(reset)' : sepText) + ' '
+    : '  ';
+  let fmt = segs.join(sep);
+  if (meOn && !(author && author.on)) fmt = '~~%ae~~' + fmt;
+  if (state.refs) fmt += '%C(auto)%d';
+  return fmt;
+}
+
+function buildAliasValue() {
+  const fmt = buildFormat();
+  const graph = state.graph ? ' --graph' : '';
+  if (!state.me.on) {
+    return 'log' + graph + ' ' + dateArg() + " --pretty=format:'" + fmt + "'";
+  }
+  const author = authorCol();
+  const authorOn = author && author.on;
+  const gap = ' '.repeat(state.me.marker.length + 1);
+  const mine = ansi(state.me.color, state.me.bold) + state.me.marker + ' ' + (authorOn ? '' : '\\x1b[m');
+  const others = authorOn ? ansi(author.color, author.bold) + gap : gap;
+  return '!f() { me=$(git config user.email); git log --color=always' + graph + ' ' + dateArg() +
+    " --pretty=format:'" + fmt + "' \"$@\"" +
+    ' | sed -e "s/~~$me~~/' + mine + '/" -e "s/~~[^~]*~~/' + others + '/" | less -RFX; }; f';
+}
+
+const shQuote = v => "'" + v.replace(/'/g, "'\\''") + "'";
+
+function renderCommands() {
+  const name = state.alias;
+  const value = buildAliasValue();
+  const ps = $('tabPs').getAttribute('aria-selected') === 'true';
+  const bak = ps ? '"$HOME\\.gitalias-' + name + '.bak"' : '~/.gitalias-' + name + '.bak';
+
+  $('cmdBackup').textContent = 'git config --global --get alias.' + name + ' > ' + bak;
+  $('cmdSet').textContent = ps
+    // Here-string literal: PowerShell no interpreta $, comillas ni backticks dentro.
+    ? "$valor = @'\n" + value + "\n'@\ngit config --global alias." + name + ' $valor'
+    : 'git config --global alias.' + name + ' ' + shQuote(value);
+  $('cmdTry').textContent = 'git ' + name + ' -15';
+  $('cmdRestore').textContent = ps
+    ? 'git config --global alias.' + name + ' (Get-Content ' + bak + ' -Raw).Trim()'
+    : 'git config --global alias.' + name + ' "$(cat ' + bak + ')"';
+  $('noteMe').hidden = !state.me.on;
+}
+
+// ── Vista previa ────────────────────────────────────────────────────
+
+function fmtDate(iso) {
+  const d = new Date(iso);
+  const ymd = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  const hm = pad(d.getHours()) + ':' + pad(d.getMinutes());
+  switch (state.dateFmt) {
+    case 'relative': {
+      const days = Math.round((NOW - d) / 86400000);
+      if (days < 14) return days + (days === 1 ? ' day ago' : ' days ago');
+      const weeks = Math.round(days / 7);
+      return weeks + ' weeks ago';
+    }
+    case 'iso': return ymd + ' ' + hm;
+    case 'dm':  return pad(d.getDate()) + '-' + MONTHS[d.getMonth()] + ' ' + hm;
+    default:    return ymd;
+  }
+}
+
+// Igual que %<(N,trunc): recorta con ".." y rellena a la derecha.
+function fit(text, width) {
+  if (!width) return text;
+  if (text.length > width) return text.slice(0, Math.max(0, width - 2)) + '..';
+  return text.padEnd(width, ' ');
+}
+
+function span(text, color, bold, col) {
+  const el = document.createElement(bold ? 'b' : 'span');
+  el.textContent = text;
+  if (color) el.style.color = color;
+  if (col) el.dataset.col = col;
+  return el;
+}
+
+function refsNodes(refs) {
+  const frag = document.createDocumentFragment();
+  const yellow = '#C9A227';
+  const wrap = document.createElement('span');
+  wrap.dataset.col = 'refs';
+  wrap.append(span(' (', yellow));
+  refs.forEach((r, i) => {
+    if (i) wrap.append(span(', ', yellow));
+    if (r.length === 2) {
+      wrap.append(span(r[0], '#56B6C2', true), span(' -> ', yellow), span(r[1], '#7EC16E', true));
+    } else if (r[0].startsWith('tag:')) {
+      wrap.append(span(r[0], '#E5C07B', true));
+    } else {
+      wrap.append(span(r[0], '#E06C75', true));
+    }
+  });
+  wrap.append(span(')', yellow));
+  frag.append(wrap);
+  return frag;
+}
+
+function renderPreview() {
+  const box = $('preview');
+  box.style.setProperty('--tbg', state.bg);
+  box.parentElement.style.setProperty('--tbg', state.bg);
+  box.style.setProperty('--tfg', state.fg);
+  box.parentElement.style.setProperty('--tfg', state.fg);
+  box.replaceChildren();
+
+  const prompt = span('$ git ' + state.alias + '\n');
+  prompt.className = 'prompt';
+  box.append(prompt);
+  $('promptLabel').textContent = 'git ' + state.alias;
+
+  const author = authorCol();
+  const authorOn = author && author.on;
+  const gap = ' '.repeat(state.me.marker.length + 1);
+  const active = state.cols.filter(c => c.on);
+
+  SAMPLE.forEach(commit => {
+    const line = document.createDocumentFragment();
+    if (state.graph) line.append(span('* ', '#E06C75'));
+    const isMe = state.me.on && commit.me;
+
+    if (state.me.on && !authorOn) {
+      line.append(isMe ? span(state.me.marker + ' ', state.me.color, state.me.bold) : span(gap));
+    }
+
+    active.forEach((c, i) => {
+      if (i > 0) {
+        if (state.sep) {
+          line.append(span(' '), span(state.sep, state.sepColor, false, 'sep'), span(' '));
+        } else {
+          line.append(span('  '));
+        }
+      }
+      let text;
+      if (c.id === 'hash') text = commit.h;
+      else if (c.id === 'date') text = fmtDate(commit.d);
+      else if (c.id === 'author') text = commit.me ? (state.me.name || 'tu-usuario') : commit.a;
+      else text = commit.s;
+      text = fit(text, c.width);
+
+      if (c.id === 'author' && state.me.on) {
+        if (isMe) line.append(span(state.me.marker + ' ' + text, state.me.color, state.me.bold, 'author'));
+        else line.append(span(gap + text, c.color, c.bold, 'author'));
+      } else {
+        line.append(span(text, c.color, c.bold, c.id));
+      }
+    });
+
+    if (state.refs && commit.refs) line.append(refsNodes(commit.refs));
+    line.append('\n');
+    box.append(line);
+  });
+}
+
+// ── Controles ───────────────────────────────────────────────────────
+
+function markCustom() {
+  state.theme = 'custom';
+  $('theme').value = 'custom';
+}
+
+function renderCols() {
+  const list = $('cols');
+  list.replaceChildren();
+  state.cols.forEach((c, idx) => {
+    const row = document.createElement('div');
+    row.className = 'col-row' + (c.on ? '' : ' off');
+    row.dataset.focus = c.id;
+
+    const name = document.createElement('label');
+    name.className = 'col-name check';
+    const on = document.createElement('input');
+    on.type = 'checkbox';
+    on.checked = c.on;
+    on.addEventListener('change', () => { c.on = on.checked; update(true); });
+    const small = document.createElement('small');
+    small.textContent = COL_INFO[c.id].token;
+    name.append(on, ' ' + COL_INFO[c.id].label + ' ', small);
+
+    // Color: hex o el de la terminal
+    const colorBox = document.createElement('span');
+    colorBox.className = 'col-ctrl';
+    const picker = document.createElement('input');
+    picker.type = 'color';
+    picker.value = c.color || state.fg;
+    picker.disabled = !c.color;
+    picker.setAttribute('aria-label', 'Color de ' + COL_INFO[c.id].label);
+    picker.addEventListener('input', () => { c.color = picker.value.toUpperCase(); markCustom(); update(false); });
+    const plain = document.createElement('label');
+    plain.className = 'check';
+    plain.title = 'Usar el color normal de la terminal';
+    const plainChk = document.createElement('input');
+    plainChk.type = 'checkbox';
+    plainChk.checked = !c.color;
+    plainChk.addEventListener('change', () => {
+      c.color = plainChk.checked ? '' : picker.value.toUpperCase();
+      markCustom();
+      update(true);
+    });
+    plain.append(plainChk, span('normal'));
+    colorBox.append(picker, plain);
+
+    const boldBtn = document.createElement('button');
+    boldBtn.type = 'button';
+    boldBtn.className = 'bold-toggle col-ctrl';
+    boldBtn.title = 'Negrita';
+    boldBtn.innerHTML = '<b>B</b>';
+    boldBtn.setAttribute('aria-pressed', String(c.bold));
+    boldBtn.addEventListener('click', () => { c.bold = !c.bold; update(true); });
+
+    const widthBox = document.createElement('label');
+    widthBox.className = 'col-ctrl';
+    widthBox.title = 'Ancho fijo en caracteres; 0 = libre';
+    const width = document.createElement('input');
+    width.type = 'number';
+    width.min = 0; width.max = 120;
+    width.value = c.width;
+    width.setAttribute('aria-label', 'Ancho de ' + COL_INFO[c.id].label);
+    width.addEventListener('input', () => {
+      const n = parseInt(width.value, 10);
+      c.width = Number.isFinite(n) && n > 0 ? Math.min(n, 120) : 0;
+      update(false);
+    });
+    widthBox.append(span('ancho '), width);
+
+    const order = document.createElement('span');
+    order.className = 'order';
+    const up = document.createElement('button');
+    up.type = 'button'; up.className = 'icon'; up.textContent = '↑';
+    up.setAttribute('aria-label', 'Subir ' + COL_INFO[c.id].label);
+    up.disabled = idx === 0;
+    up.addEventListener('click', () => move(idx, -1));
+    const down = document.createElement('button');
+    down.type = 'button'; down.className = 'icon'; down.textContent = '↓';
+    down.setAttribute('aria-label', 'Bajar ' + COL_INFO[c.id].label);
+    down.disabled = idx === state.cols.length - 1;
+    down.addEventListener('click', () => move(idx, 1));
+    order.append(up, down);
+
+    row.append(name, colorBox, boldBtn, widthBox, order);
+    list.append(row);
+  });
+  bindFocus(list);
+}
+
+function move(idx, dir) {
+  const [c] = state.cols.splice(idx, 1);
+  state.cols.splice(idx + dir, 0, c);
+  update(true);
+  // Mantiene el foco en el botón movido para poder seguir con el teclado.
+  const row = $('cols').children[idx + dir];
+  if (row) row.querySelectorAll('.order button')[dir < 0 ? 0 : 1]?.focus();
+}
+
+function bindFocus(root) {
+  root.querySelectorAll('[data-focus]').forEach(el => {
+    const set = () => { $('preview').dataset.focus = el.dataset.focus; };
+    const clear = () => { delete $('preview').dataset.focus; };
+    el.addEventListener('mouseenter', set);
+    el.addEventListener('mouseleave', clear);
+    el.addEventListener('focusin', set);
+    el.addEventListener('focusout', clear);
+  });
+}
+
+function applyTheme(key) {
+  const t = THEMES[key];
+  if (!t) return;
+  state.theme = key;
+  state.bg = t.bg;
+  state.fg = t.fg;
+  state.sepColor = t.sep;
+  state.me.color = t.me;
+  state.cols.forEach(c => { if (c.id !== 'subject') c.color = t[c.id]; });
+}
+
+function syncInputs() {
+  $('theme').value = state.theme;
+  $('bg').value = state.bg;
+  $('sep').value = state.sep;
+  $('sepColor').value = state.sepColor || state.fg;
+  $('dateFmt').value = state.dateFmt;
+  $('graph').checked = state.graph;
+  $('refsOn').checked = state.refs;
+  $('meOn').checked = state.me.on;
+  $('meBox').hidden = !state.me.on;
+  $('meMarker').value = state.me.marker;
+  $('meColor').value = state.me.color;
+  $('meBold').setAttribute('aria-pressed', String(state.me.bold));
+  $('meName').value = state.me.name;
+  $('alias').value = state.alias;
+}
+
+function update(rebuildCols) {
+  if (rebuildCols) renderCols();
+  renderPreview();
+  renderCommands();
+  save();
+}
+
+$('theme').addEventListener('change', e => {
+  if (e.target.value !== 'custom') applyTheme(e.target.value);
+  syncInputs();
+  update(true);
+});
+$('bg').addEventListener('input', e => { state.bg = e.target.value.toUpperCase(); update(false); });
+$('sep').addEventListener('change', e => { state.sep = e.target.value; update(false); });
+$('sepColor').addEventListener('input', e => { state.sepColor = e.target.value.toUpperCase(); markCustom(); update(false); });
+$('dateFmt').addEventListener('change', e => { state.dateFmt = e.target.value; update(false); });
+$('graph').addEventListener('change', e => { state.graph = e.target.checked; update(false); });
+$('refsOn').addEventListener('change', e => { state.refs = e.target.checked; update(false); });
+$('meOn').addEventListener('change', e => { state.me.on = e.target.checked; $('meBox').hidden = !state.me.on; update(false); });
+$('meMarker').addEventListener('change', e => { state.me.marker = e.target.value; update(false); });
+$('meColor').addEventListener('input', e => { state.me.color = e.target.value.toUpperCase(); markCustom(); update(false); });
+$('meBold').addEventListener('click', () => {
+  state.me.bold = !state.me.bold;
+  $('meBold').setAttribute('aria-pressed', String(state.me.bold));
+  update(false);
+});
+$('meName').addEventListener('input', e => { state.me.name = e.target.value; update(false); });
+$('alias').addEventListener('input', e => {
+  const v = e.target.value.trim();
+  const ok = /^[A-Za-z][A-Za-z0-9-]*$/.test(v);
+  $('aliasErr').hidden = ok;
+  if (ok) { state.alias = v; update(false); }
+});
+
+function selectTab(ps) {
+  $('tabPs').setAttribute('aria-selected', String(ps));
+  $('tabSh').setAttribute('aria-selected', String(!ps));
+  renderCommands();
+}
+$('tabPs').addEventListener('click', () => selectTab(true));
+$('tabSh').addEventListener('click', () => selectTab(false));
+
+document.querySelectorAll('.copy').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const text = $(btn.dataset.copy).textContent;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (e) {
+      // Respaldo para navegadores sin permiso de portapapeles (p.ej. file://)
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.append(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+    }
+    btn.textContent = 'Copiado';
+    setTimeout(() => { btn.textContent = 'Copiar'; }, 1400);
+  });
+});
+
+bindFocus(document.querySelector('.grid'));
+syncInputs();
+update(true);
+</script>
+</body>
+</html>

@@ -11,6 +11,9 @@ Import, design and apply git aliases visually. Everything runs in your browser.
   - **Charts**: commits per day, week or author, or the most changed files, as bars that always fit.
   - **Undo**: tell it what happened and get the right command. Commands that can delete work need your explicit OK and ask before running.
 - **Apply**: get commands that work in PowerShell (5.1 and 7), Bash/zsh or Command Prompt, or one file for everything.
+- **Explain any alias**: paste an alias, a git command or a whole `git config --global alias…` line and see every part explained in plain words. Commands in Apply are explained the same way.
+- **git cheat**: the downloaded file keeps a description for each alias, and `git cheat` prints them in your terminal.
+- **English and Spanish**: the language follows your browser and can be switched at any time. Translations live in `src/i18n`.
 
 Live site: `https://OWNER.github.io/gitaliases-studio/`
 

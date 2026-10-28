@@ -25,7 +25,8 @@ test('awk stays portable and handles empty periods', () => {
   expect(v).not.toContain('\\x1b');
   expect(v).toContain(String.raw`\033[`);
   expect(v).toContain('No commits in this period.');
-  expect(v).toContain('*40/m');
+  // One block per commit; scaled only when the biggest row would pass 40.
+  expect(v).toContain('b=(m>40) ? int(cnt[i]*40/m) : cnt[i]');
   // Without a color there are no escape codes at all.
   expect(buildChartAliasValue({ ...CHART_PRESETS.activity, color: '' })).not.toContain('\\033');
 });
@@ -48,6 +49,10 @@ describe('preview scaling', () => {
   test('ranked metrics keep the top N, biggest first', () => {
     const lines = renderChartPreview({ ...CHART_PRESETS.authors, top: 2 }, SAMPLE_CHART.author);
     expect(lines.map((l) => l[0]!.text.trim())).toEqual(['Ana Lucía Hernández', 'you']);
+  });
+  test('small counts are not stretched', () => {
+    const lines = renderChartPreview({ ...CHART_PRESETS.activity, maxWidth: 40 }, [{ label: '2026-10-22', count: 2 }]);
+    expect(lines[0]!.at(-1)!.text).toBe('▇▇');
   });
   test('no rows', () => expect(renderChartPreview(CHART_PRESETS.activity, [])[0]![0]!.text).toBe('No commits in this period.'));
 });

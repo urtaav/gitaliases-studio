@@ -41,20 +41,24 @@ test('themed branch alias prints its colors', () => {
   expect(plain(forced.stdout).trim()).toBe('2026-01-01 main');
 }, 60_000);
 
-test('author chart keeps full names and scales bars to the max width', () => {
+test('author chart keeps full names: one block per commit, scaled only past the max width', () => {
   const repo = makeRepo('authors');
   for (let i = 0; i < 6; i++) repo.commit(`a${i}`, ANA, `2026-01-0${i + 1}T10:00:00`);
   repo.commit('k', KENJI, '2026-01-09T10:00:00');
-  const recipe = { ...CHART_PRESETS.authors, maxWidth: 12 };
-  repo.alias('authors', buildChartAliasValue(recipe));
+  repo.alias('authors', buildChartAliasValue({ ...CHART_PRESETS.authors, maxWidth: 12 }));
+  repo.alias('tight', buildChartAliasValue({ ...CHART_PRESETS.authors, maxWidth: 3 }));
 
   const r = repo.git(['authors']);
   expect(r.status, r.stderr).toBe(0);
   expect(r.stdout).toContain('\x1b[38;2;');
   const lines = plain(r.stdout).trim().split('\n');
   expect(lines).toHaveLength(2);
-  expect(lines[0]).toMatch(/^Ana Lucía Hernández\s+6 ▇{12}$/);
-  expect(lines[1]).toMatch(/^Kenji\s+1 ▇{2}$/);
+  expect(lines[0]).toMatch(/^Ana Lucía Hernández\s+6 ▇{6}$/);
+  expect(lines[1]).toMatch(/^Kenji\s+1 ▇{1}$/);
+
+  const tight = plain(repo.git(['tight']).stdout).trim().split('\n');
+  expect(tight[0]).toMatch(/ 6 ▇{3}$/);
+  expect(tight[1]).toMatch(/ 1 ▇{1}$/);
 }, 60_000);
 
 test('activity chart on a period without commits says so', () => {

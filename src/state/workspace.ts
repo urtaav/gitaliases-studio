@@ -11,6 +11,8 @@ export interface WorkspaceState {
   shell: Shell;
   terminalBg: string;
   draft: LogRecipe;
+  /** Alias name the Log designer saves to. */
+  draftName: string;
   meName: string;
 }
 
@@ -23,7 +25,7 @@ export type Action =
   | { type: 'setTheme'; themeId: string }
   | { type: 'setShell'; shell: Shell }
   | { type: 'setTerminalBg'; color: string }
-  | { type: 'setDraft'; draft: LogRecipe }
+  | { type: 'setDraft'; draft: LogRecipe; name?: string }
   | { type: 'setMeName'; name: string }
   | { type: 'reset' };
 
@@ -38,6 +40,7 @@ export function initialState(platform: string = ''): WorkspaceState {
     shell: /win/i.test(platform) ? 'powershell' : 'bash',
     terminalBg: theme.colors.bg,
     draft: applyThemeToRecipe(DEFAULT_RECIPE, theme),
+    draftName: 'ltable',
     meName: 'you',
   };
 }
@@ -79,7 +82,7 @@ export function reducer(s: WorkspaceState, a: Action): WorkspaceState {
     case 'setTerminalBg':
       return { ...s, terminalBg: a.color };
     case 'setDraft':
-      return { ...s, draft: a.draft };
+      return { ...s, draft: a.draft, draftName: a.name ?? s.draftName };
     case 'setMeName':
       return { ...s, meName: a.name };
     case 'reset':
